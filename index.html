@@ -681,6 +681,9 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
         }
 
         function updateTreatmentTables() {
+            // First, preserve existing data
+            const existingData = preserveExistingData();
+            
             const tablesContainer = document.getElementById('data-input-tables');
             tablesContainer.innerHTML = '';
             
@@ -700,6 +703,35 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
                 `;
                 tablesContainer.appendChild(tableDiv);
             });
+            
+            // Restore preserved data
+            restoreExistingData(existingData);
+        }
+
+        function preserveExistingData() {
+            const existingData = {};
+            
+            // Find all existing input fields and save their values
+            const inputs = document.querySelectorAll('[id^="data-"]');
+            inputs.forEach(input => {
+                if (input.value && input.value !== '0') {
+                    existingData[input.id] = input.value;
+                }
+            });
+            
+            return existingData;
+        }
+
+        function restoreExistingData(existingData) {
+            // Wait for DOM to be ready, then restore values
+            setTimeout(() => {
+                Object.keys(existingData).forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.value = existingData[inputId];
+                    }
+                });
+            }, 100);
         }
 
         function generateDataInputTable(treatmentId, numReps, times) {
@@ -715,8 +747,20 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
                 let row = `<td><strong>${time}h</strong></td>`;
                 for (let rep = 1; rep <= numReps; rep++) {
                     row += `
-                        <td><input type="number" id="data-${treatmentId}-${time}-${rep}-morbid" min="0" value="0"></td>
-                        <td><input type="number" id="data-${treatmentId}-${time}-${rep}-dead" min="0" value="0"></td>
+                        <td><input type="number" 
+                                  id="data-${treatmentId}-${time}-${rep}-morbid" 
+                                  min="0" 
+                                  value="0" 
+                                  onchange="validateInput(this)"
+                                  onblur="autoSave()"
+                                  placeholder="0"></td>
+                        <td><input type="number" 
+                                  id="data-${treatmentId}-${time}-${rep}-dead" 
+                                  min="0" 
+                                  value="0"
+                                  onchange="validateInput(this)"
+                                  onblur="autoSave()"
+                                  placeholder="0"></td>
                     `;
                 }
                 rows += `<tr>${row}</tr>`;
@@ -731,7 +775,71 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
                         ${rows}
                     </tbody>
                 </table>
+                <div style="text-align: center; margin-top: 0.5rem;">
+                    <small style="color: var(--text-secondary); font-style: italic;">
+                        💾 Data auto-saves as you type
+                    </small>
+                </div>
             `;
+        }
+
+        function validateInput(input) {
+            const value = parseInt(input.value) || 0;
+            const insectsPerRep = getInsectsPerRep();
+            
+            // Validate that total affected doesn't exceed insects per replication
+            if (value > insectsPerRep) {
+                input.style.borderColor = 'var(--warning-color)';
+                input.title = `Warning: Value (${value}) exceeds insects per replication (${insectsPerRep})`;
+            } else {
+                input.style.borderColor = 'var(--border-color)';
+                input.title = '';
+            }
+            
+            // Clear results to indicate data has changed
+            const resultsContent = document.getElementById('results-content');
+            if (resultsContent.innerHTML !== '' && !resultsContent.innerHTML.includes('empty-state')) {
+                const changeNotice = document.createElement('div');
+                changeNotice.className = 'info-box';
+                changeNotice.style.background = 'rgba(214, 114, 41, 0.1)';
+                changeNotice.style.borderColor = 'var(--warning-color)';
+                changeNotice.innerHTML = `
+                    <strong>⚠️ Data Modified!</strong> 
+                    Click "Analyze Complete Experiment" to update results with your changes.
+                `;
+                resultsContent.insertBefore(changeNotice, resultsContent.firstChild);
+            }
+        }
+
+        function autoSave() {
+            // Simple auto-save indication
+            const saveIndicators = document.querySelectorAll('.save-indicator');
+            saveIndicators.forEach(indicator => indicator.remove());
+            
+            // Show save confirmation briefly
+            const indicator = document.createElement('span');
+            indicator.className = 'save-indicator';
+            indicator.style.cssText = `
+                position: fixed; 
+                top: 20px; 
+                right: 20px; 
+                background: var(--success-color); 
+                color: white; 
+                padding: 0.5rem 1rem; 
+                border-radius: 4px; 
+                font-family: 'JetBrains Mono', monospace; 
+                font-size: 0.8rem;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease-in-out;
+            `;
+            indicator.textContent = '💾 Saved';
+            document.body.appendChild(indicator);
+            
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.parentNode.removeChild(indicator);
+                }
+            }, 2000);
         }
 
         function getAllTreatments() {
@@ -760,6 +868,9 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
             const btnText = document.getElementById('btn-text');
             const resultsContent = document.getElementById('results-content');
             
+            // Clear previous results immediately
+            resultsContent.innerHTML = '<div class="empty-state"><span class="loading"></span> Processing your data...</div>';
+            
             // Show loading state
             btnText.innerHTML = '<span class="loading"></span> Processing...';
             
@@ -782,14 +893,38 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
                     experimentData = parseCSVData();
                 }
                 
+                // Validate that we have data
+                if (experimentData.length === 0) {
+                    throw new Error('No observation data found. Please enter your experimental data.');
+                }
+                
                 // Calculate all results
                 const results = calculateExperimentResults(experimentData, insectsPerRep);
+                
+                // Clear results panel completely before displaying new results
+                resultsContent.innerHTML = '';
                 
                 // Display comprehensive results
                 displayExperimentResults(experimentTitle, results, insectsPerRep);
                 
+                // Add success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'info-box';
+                successDiv.style.background = 'rgba(127, 176, 105, 0.2)';
+                successDiv.style.borderColor = 'var(--success-color)';
+                successDiv.innerHTML = `
+                    <strong>✅ Analysis Complete!</strong> 
+                    Results updated with current data. You can modify any values above and re-analyze.
+                `;
+                resultsContent.insertBefore(successDiv, resultsContent.firstChild);
+                
             } catch (error) {
-                resultsContent.innerHTML = `<div class="error-message"><strong>Error:</strong> ${error.message}</div>`;
+                resultsContent.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error:</strong> ${error.message}
+                        <br><small>Please check your data and try again.</small>
+                    </div>
+                `;
             } finally {
                 btnText.textContent = 'Analyze Complete Experiment';
             }
@@ -950,9 +1085,14 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
             const resultsContent = document.getElementById('results-content');
             
             let html = `
-                <h3 style="color: var(--primary-color); margin-bottom: 2rem; font-family: 'JetBrains Mono', monospace;">
-                    ${experimentTitle}
-                </h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem;">
+                    <h3 style="color: var(--primary-color); margin: 0; font-family: 'JetBrains Mono', monospace;">
+                        ${experimentTitle}
+                    </h3>
+                    <button class="btn btn-small btn-accent" onclick="processAllData()" style="font-size: 0.75rem;">
+                        🔄 Re-analyze
+                    </button>
+                </div>
             `;
             
             // Display each treatment's results
@@ -977,6 +1117,9 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
             
             resultsContent.innerHTML = html;
             resultsContent.classList.add('fade-in');
+            
+            // Scroll to results
+            resultsContent.scrollIntoView({ behavior: 'smooth' });
         }
 
         function generateResultTable(processedData, numReps, showAbbott) {
