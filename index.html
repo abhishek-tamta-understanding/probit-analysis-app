@@ -948,8 +948,8 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
                         const deadInput = document.getElementById(`data-${treatment.id}-${time}-${rep}-dead`);
                         
                         observation.replications.push({
-                            morbid: parseInt(morbidInput.value) || 0,
-                            dead: parseInt(deadInput.value) || 0
+                            morbid: parseInt(morbidInput?.value) || 0,
+                            dead: parseInt(deadInput?.value) || 0
                         });
                     }
                     
@@ -1046,25 +1046,46 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
 
         function calculateTreatmentMortality(observations, insectsPerRep) {
             const processedData = [];
-            const cumulativeAffected = {};
+            const cumulativeTotalAffected = {}; // Track cumulative morbidity + mortality per replication
             
             // Sort observations by time
             observations.sort((a, b) => a.time - b.time);
             
             observations.forEach(obs => {
-                if (!cumulativeAffected[obs.time]) {
-                    cumulativeAffected[obs.time] = new Array(obs.replications.length).fill(0);
+                const numReps = obs.replications.length;
+                
+                // Initialize cumulative tracking for this time point if not exists
+                if (!cumulativeTotalAffected[obs.time]) {
+                    cumulativeTotalAffected[obs.time] = new Array(numReps).fill(0);
                 }
                 
-                const totalAffected = obs.replications.map((rep, index) => {
-                    const newAffected = rep.morbid + rep.dead;
-                    cumulativeAffected[obs.time][index] = Math.min(
-                        (cumulativeAffected[obs.time][index] || 0) + newAffected, 
-                        insectsPerRep
-                    );
-                    return cumulativeAffected[obs.time][index];
-                });
+                // For the first time point, just use current observations
+                if (obs.time === observations[0].time) {
+                    obs.replications.forEach((rep, index) => {
+                        cumulativeTotalAffected[obs.time][index] = rep.morbid + rep.dead;
+                    });
+                } else {
+                    // For subsequent time points, add new observations to previous cumulative total
+                    const previousTimePoints = Object.keys(cumulativeTotalAffected)
+                        .map(t => parseFloat(t))
+                        .filter(t => t < obs.time)
+                        .sort((a, b) => b - a); // Get most recent previous time point
+                    
+                    const previousTime = previousTimePoints[0];
+                    const previousCumulative = cumulativeTotalAffected[previousTime] || new Array(numReps).fill(0);
+                    
+                    obs.replications.forEach((rep, index) => {
+                        // Add current morbid + dead to previous cumulative
+                        const newAffected = rep.morbid + rep.dead;
+                        const totalCumulative = previousCumulative[index] + newAffected;
+                        
+                        // Ensure it doesn't exceed insects per replication
+                        cumulativeTotalAffected[obs.time][index] = Math.min(totalCumulative, insectsPerRep);
+                    });
+                }
                 
+                // Calculate mortality percentage
+                const totalAffected = cumulativeTotalAffected[obs.time];
                 const avgAffected = totalAffected.reduce((a, b) => a + b, 0) / totalAffected.length;
                 const mortalityPercent = (avgAffected / insectsPerRep) * 100;
                 
@@ -1072,7 +1093,8 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
                     time: obs.time,
                     morbid: obs.replications.map(r => r.morbid),
                     dead: obs.replications.map(r => r.dead),
-                    totalAffected: totalAffected,
+                    morbidPlusDead: obs.replications.map(r => r.morbid + r.dead),
+                    cumulativeTotalAffected: [...totalAffected],
                     mortalityPercent: mortalityPercent,
                     abbottCorrected: mortalityPercent // Will be recalculated if control exists
                 });
@@ -1089,16 +1111,25 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
                     <h3 style="color: var(--primary-color); margin: 0; font-family: 'JetBrains Mono', monospace;">
                         ${experimentTitle}
                     </h3>
-                    <button class="btn btn-small btn-accent" onclick="processAllData()" style="font-size: 0.75rem;">
-                        🔄 Re-analyze
-                    </button>
+                    <div>
+                        <button class="btn btn-small btn-secondary" onclick="toggleRawDataView()" style="font-size: 0.75rem; margin-right: 0.5rem;">
+                            📋 View Raw Data
+                        </button>
+                        <button class="btn btn-small btn-accent" onclick="processAllData()" style="font-size: 0.75rem;">
+                            🔄 Re-analyze
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="raw-data-overview" style="display: none; margin-bottom: 2rem;">
+                    ${generateRawDataOverview(results)}
                 </div>
             `;
             
             // Display each treatment's results
             Object.keys(results).forEach(key => {
                 const result = results[key];
-                const numReps = result.processedData[0]?.totalAffected.length || 3;
+                const numReps = result.processedData[0]?.cumulativeTotalAffected.length || 3;
                 
                 html += `
                     <div class="treatment-results">
@@ -1121,29 +1152,153 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
             // Scroll to results
             resultsContent.scrollIntoView({ behavior: 'smooth' });
         }
+        
+        function generateRawDataOverview(results) {
+            let html = `
+                <div style="background: var(--background-color); padding: 1.5rem; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-family: 'JetBrains Mono', monospace;">
+                        📋 Raw Data Overview - All Treatments
+                    </h4>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Treatment</th>
+                                <th>Concentration (%)</th>
+                                <th>Time (h)</th>
+                                <th>Rep 1<br>M | D</th>
+                                <th>Rep 2<br>M | D</th>
+                                <th>Rep 3<br>M | D</th>
+                                <th>Cumulative<br>M+D</th>
+                                <th>Mortality %</th>
+                                <th>Abbott's %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // Sort results by treatment name and concentration
+            const sortedResults = Object.keys(results).sort((a, b) => {
+                const resultA = results[a];
+                const resultB = results[b];
+                if (resultA.isControl !== resultB.isControl) {
+                    return resultA.isControl ? 1 : -1; // Controls at the end
+                }
+                return resultA.treatment.localeCompare(resultB.treatment);
+            });
+            
+            sortedResults.forEach(key => {
+                const result = results[key];
+                const isFirstRow = result.processedData.length > 0;
+                
+                result.processedData.forEach((data, index) => {
+                    const numReps = data.cumulativeTotalAffected.length;
+                    let row = '';
+                    
+                    // Treatment name and concentration (only show on first row)
+                    if (index === 0) {
+                        row += `
+                            <td rowspan="${result.processedData.length}" style="vertical-align: middle; background: ${result.isControl ? 'rgba(108, 117, 125, 0.1)' : 'rgba(127, 176, 105, 0.1)'};">
+                                <strong>${result.treatment}</strong>
+                                ${result.isControl ? '<br><small>[CONTROL]</small>' : ''}
+                            </td>
+                            <td rowspan="${result.processedData.length}" style="vertical-align: middle;">
+                                <strong>${result.concentration}%</strong>
+                            </td>
+                        `;
+                    }
+                    
+                    // Time point
+                    row += `<td><strong>${data.time}h</strong></td>`;
+                    
+                    // Replication data (Morbid | Dead)
+                    for (let rep = 0; rep < Math.min(numReps, 3); rep++) {
+                        const morbid = data.morbid[rep] || 0;
+                        const dead = data.dead[rep] || 0;
+                        row += `<td>${morbid} | ${dead}</td>`;
+                    }
+                    
+                    // If less than 3 reps, fill empty cells
+                    for (let rep = numReps; rep < 3; rep++) {
+                        row += '<td>-</td>';
+                    }
+                    
+                    // Cumulative M+D
+                    const cumulativeStr = data.cumulativeTotalAffected.slice(0, 3).join(', ');
+                    row += `<td><strong>[${cumulativeStr}]</strong></td>`;
+                    
+                    // Mortality % and Abbott's corrected %
+                    row += `<td><strong>${data.mortalityPercent.toFixed(1)}%</strong></td>`;
+                    row += `<td><strong style="color: ${result.isControl ? 'var(--control-color)' : 'var(--accent-color)'};">${data.abbottCorrected.toFixed(1)}%</strong></td>`;
+                    
+                    html += `<tr>${row}</tr>`;
+                });
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
+                        <strong>Legend:</strong> M = Morbid, D = Dead, M+D = Cumulative Morbidity + Mortality per replication
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+        
+        function toggleRawDataView() {
+            const rawDataDiv = document.getElementById('raw-data-overview');
+            const button = document.querySelector('[onclick="toggleRawDataView()"]');
+            
+            if (rawDataDiv.style.display === 'none') {
+                rawDataDiv.style.display = 'block';
+                button.textContent = '📋 Hide Raw Data';
+                rawDataDiv.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                rawDataDiv.style.display = 'none';
+                button.textContent = '📋 View Raw Data';
+            }
+        }
 
         function generateResultTable(processedData, numReps, showAbbott) {
-            let headerCols = '<th>Time (h)</th>';
+            let headerCols = '<th rowspan="2">Time (h)</th>';
             
+            // Create header for each replication
             for (let rep = 1; rep <= numReps; rep++) {
-                headerCols += `<th>R${rep}<br>Morb</th><th>R${rep}<br>Dead</th><th>R${rep}<br>Total</th>`;
+                headerCols += `<th colspan="3">Replication ${rep}</th>`;
             }
-            headerCols += '<th>Avg Mortality %</th>';
+            headerCols += '<th rowspan="2">Morbidity + Mortality<br>Combined</th>';
+            headerCols += '<th rowspan="2">Mortality %</th>';
             if (showAbbott) {
-                headerCols += '<th>Abbott\'s Corrected %</th>';
+                headerCols += '<th rowspan="2">Abbott\'s<br>Corrected %</th>';
+            }
+            
+            // Sub-header row
+            let subHeaderCols = '';
+            for (let rep = 1; rep <= numReps; rep++) {
+                subHeaderCols += '<th>Morbid</th><th>Dead</th><th>M+D</th>';
             }
             
             let rows = '';
             processedData.forEach(data => {
                 let row = `<td><strong>${data.time}h</strong></td>`;
                 
+                // Data for each replication
                 for (let rep = 0; rep < numReps; rep++) {
+                    const morbid = data.morbid[rep] || 0;
+                    const dead = data.dead[rep] || 0;
+                    const combined = morbid + dead;
+                    
                     row += `
-                        <td>${data.morbid[rep] || 0}</td>
-                        <td>${data.dead[rep] || 0}</td>
-                        <td><strong>${data.totalAffected[rep] || 0}</strong></td>
+                        <td>${morbid}</td>
+                        <td>${dead}</td>
+                        <td><strong>${combined}</strong></td>
                     `;
                 }
+                
+                // Combined column showing cumulative totals
+                const combinedStr = data.cumulativeTotalAffected.join(', ');
+                row += `<td><strong>[${combinedStr}]</strong></td>`;
                 
                 row += `<td><strong>${data.mortalityPercent.toFixed(1)}%</strong></td>`;
                 if (showAbbott) {
@@ -1157,11 +1312,15 @@ Control, 0, 12, 0, 0, 0, 0, 0, 0"></textarea>
                 <table class="data-table">
                     <thead>
                         <tr>${headerCols}</tr>
+                        <tr>${subHeaderCols}</tr>
                     </thead>
                     <tbody>
                         ${rows}
                     </tbody>
                 </table>
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
+                    <strong>Note:</strong> Morbidity + Mortality Combined shows cumulative affected insects per replication [R1, R2, R3...]
+                </div>
             `;
         }
 
