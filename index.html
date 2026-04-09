@@ -520,6 +520,1953 @@
                     </button>
                 </div>
 
+                <h3 class="panel-title" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--secondary-color);">Analysis Type</h3>
+
+                <div class="form-group">
+                    <label>Select Analysis Method:</label>
+                    <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                        <label style="display: flex; align-items: center; font-weight: normal;">
+                            <input type="radio" name="analysis-type" value="mortality" checked onchange="toggleAnalysisType()">
+                            <span style="margin-left: 0.5rem;">Standard Mortality Analysis</span>
+                        </label>
+                        <label style="display: flex; align-items: center; font-weight: normal;">
+                            <input type="radio" name="analysis-type" value="probit" onchange="toggleAnalysisType()">
+                            <span style="margin-left: 0.5rem;">Probit Analysis (LC50, LC90, etc.)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="probit-setup" style="display: none;">
+                    <div class="info-box" style="background: rgba(127, 176, 105, 0.1); border-color: var(--accent-color);">
+                        <strong>📊 Probit Analysis Requirements:</strong><br>
+                        • Multiple concentrations (5+ recommended)<br>
+                        • Concentration-response data (not time-series)<br>
+                        • Final mortality percentages<br>
+                        • Will generate LC15, LC25, LC30, LC50, LC90 values
+                    </div>
+                </div>
+
+                <h3 class="panel-title" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--secondary-color);">Data Input Method</h3>
+
+                <div class="tab-container">
+                    <div class="tab-buttons">
+                        <button class="tab-button active" onclick="switchTab('table')">Table Input</button>
+                        <button class="tab-button" onclick="switchTab('csv')">CSV Input</button>
+                    </div>
+                </div>
+
+                <div id="table-input-section" class="tab-content active">
+                    <div id="data-input-tables">
+                        <!-- Data input tables will be generated here -->
+                    </div>
+                </div>
+
+                <div id="csv-input-section" class="tab-content">
+                    <div class="form-group">
+                        <label for="csv-data">Raw Observation Data (CSV Format)</label>
+                        <textarea id="csv-data" placeholder="Standard Analysis Format: Treatment, Concentration, Time(h), Rep1_Morbid, Rep1_Dead, Rep2_Morbid, Rep2_Dead, Rep3_Morbid, Rep3_Dead
+Chlorpyriphos, 0.02, 6, 5, 0, 3, 0, 4, 0
+Chlorpyriphos, 0.02, 12, 2, 3, 2, 1, 1, 3
+
+Probit Analysis Format: Treatment, Concentration, Insects_Tested, Insects_Dead, Mortality_Percent
+Chlorpyriphos, 0.01, 30, 3, 10.0
+Chlorpyriphos, 0.02, 30, 12, 40.0
+Chlorpyriphos, 0.05, 30, 18, 60.0
+Chlorpyriphos, 0.1, 30, 27, 90.0"></textarea>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="processAllData()" style="margin-top: 2rem; width: 100%;">
+                    <span id="btn-text">Analyze Experiment Data</span>
+                </button>
+
+                <div class="info-box">
+                    <strong>Instructions:</strong><br>
+                    1. Set up your experiment parameters<br>
+                    2. Add all treatments and controls<br>
+                    3. Enter observation data using table or CSV method<br>
+                    4. Click "Analyze Complete Experiment" for results
+                </div>
+            </div>
+
+            <div class="results-panel">
+                <h2 class="panel-title">Analysis Results</h2>
+                <div id="results-content">
+                    <div class="empty-state">
+                        Set up your experiment and enter observation data to see comprehensive analysis with mortality calculations, Abbott's corrections, and statistical comparisons.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let treatmentCounter = 0;
+        let currentInputMethod = 'table';
+        let currentAnalysisType = 'mortality';
+
+        function toggleAnalysisType() {
+            const analysisType = document.querySelector('input[name="analysis-type"]:checked').value;
+            currentAnalysisType = analysisType;
+            
+            const probitSetup = document.getElementById('probit-setup');
+            const btnText = document.getElementById('btn-text');
+            
+            if (analysisType === 'probit') {
+                probitSetup.style.display = 'block';
+                btnText.textContent = 'Perform Probit Analysis';
+                
+                // Update CSV placeholder for probit format
+                const csvTextarea = document.getElementById('csv-data');
+                csvTextarea.placeholder = `Probit Analysis Format: Treatment, Concentration, Insects_Tested, Insects_Dead, Mortality_Percent
+Chlorpyriphos, 0.01, 30, 3, 10.0
+Chlorpyriphos, 0.02, 30, 12, 40.0
+Chlorpyriphos, 0.05, 30, 18, 60.0
+Chlorpyriphos, 0.1, 30, 27, 90.0
+Cypermethrin, 0.005, 30, 2, 6.7
+Cypermethrin, 0.01, 30, 8, 26.7
+Cypermethrin, 0.02, 30, 15, 50.0
+Cypermethrin, 0.05, 30, 25, 83.3`;
+            } else {
+                probitSetup.style.display = 'none';
+                btnText.textContent = 'Analyze Experiment Data';
+                
+                // Restore standard format
+                const csvTextarea = document.getElementById('csv-data');
+                csvTextarea.placeholder = `Standard Analysis Format: Treatment, Concentration, Time(h), Rep1_Morbid, Rep1_Dead, Rep2_Morbid, Rep2_Dead, Rep3_Morbid, Rep3_Dead
+Chlorpyriphos, 0.02, 6, 5, 0, 3, 0, 4, 0
+Chlorpyriphos, 0.02, 12, 2, 3, 2, 1, 1, 3
+Control, 0, 6, 0, 0, 0, 0, 0, 0
+Control, 0, 12, 0, 0, 0, 0, 0, 0`;
+            }
+        }
+
+        function toggleCustomInsects() {
+            const select = document.getElementById('insects-per-rep');
+            const customGroup = document.getElementById('custom-insects-group');
+            
+            if (select.value === 'custom') {
+                customGroup.style.display = 'block';
+            } else {
+                customGroup.style.display = 'none';
+            }
+        }
+
+        function getInsectsPerRep() {
+            const select = document.getElementById('insects-per-rep');
+            if (select.value === 'custom') {
+                return parseInt(document.getElementById('custom-insects').value) || 10;
+            }
+            return parseInt(select.value);
+        }
+
+        function getNumReplications() {
+            return parseInt(document.getElementById('num-replications').value);
+        }
+
+        function getObservationTimes() {
+            const timesStr = document.getElementById('observation-times').value;
+            return timesStr.split(',').map(t => parseFloat(t.trim())).filter(t => !isNaN(t));
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tabName}-input-section`).classList.add('active');
+            
+            currentInputMethod = tabName;
+        }
+
+        function addTreatment() {
+            treatmentCounter++;
+            const container = document.getElementById('treatments-container');
+            
+            const treatmentDiv = document.createElement('div');
+            treatmentDiv.className = 'treatment-item';
+            treatmentDiv.id = `treatment-${treatmentCounter}`;
+            
+            treatmentDiv.innerHTML = `
+                <div class="treatment-header">
+                    <span class="treatment-title">Treatment ${treatmentCounter}</span>
+                    <button class="remove-btn" onclick="removeTreatment(${treatmentCounter})">Remove</button>
+                </div>
+                <div class="treatment-form">
+                    <div class="form-group">
+                        <label>Insecticide Name</label>
+                        <input type="text" id="treatment-name-${treatmentCounter}" placeholder="e.g., Chlorpyriphos" onchange="updateTreatmentTables()">
+                    </div>
+                    <div class="form-group">
+                        <label>Concentration (%)</label>
+                        <input type="number" id="treatment-conc-${treatmentCounter}" step="0.001" placeholder="e.g., 0.02" onchange="updateTreatmentTables()">
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(treatmentDiv);
+            updateTreatmentTables();
+        }
+
+        function addControl() {
+            treatmentCounter++;
+            const container = document.getElementById('treatments-container');
+            
+            const controlDiv = document.createElement('div');
+            controlDiv.className = 'treatment-item control';
+            controlDiv.id = `treatment-${treatmentCounter}`;
+            
+            controlDiv.innerHTML = `
+                <div class="treatment-header">
+                    <span class="treatment-title">Control Group</span>
+                    <button class="remove-btn" onclick="removeTreatment(${treatmentCounter})">Remove</button>
+                </div>
+                <div class="treatment-form">
+                    <div class="form-group">
+                        <label>Control Type</label>
+                        <input type="text" id="treatment-name-${treatmentCounter}" value="Control" onchange="updateTreatmentTables()">
+                    </div>
+                    <div class="form-group">
+                        <label>Concentration (%)</label>
+                        <input type="number" id="treatment-conc-${treatmentCounter}" value="0" readonly>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(controlDiv);
+            updateTreatmentTables();
+        }
+
+        function removeTreatment(id) {
+            const element = document.getElementById(`treatment-${id}`);
+            if (element) {
+                element.remove();
+                updateTreatmentTables();
+            }
+        }
+
+        function updateTreatmentTables() {
+            // First, preserve existing data
+            const existingData = preserveExistingData();
+            
+            const tablesContainer = document.getElementById('data-input-tables');
+            tablesContainer.innerHTML = '';
+            
+            const treatments = getAllTreatments();
+            const numReps = getNumReplications();
+            const times = getObservationTimes();
+            
+            if (treatments.length === 0 || times.length === 0) return;
+            
+            treatments.forEach((treatment, index) => {
+                const tableDiv = document.createElement('div');
+                tableDiv.innerHTML = `
+                    <h4 style="color: var(--primary-color); margin: 2rem 0 1rem 0; font-family: 'JetBrains Mono', monospace;">
+                        ${treatment.name} (${treatment.concentration}%)
+                    </h4>
+                    ${generateDataInputTable(treatment.id, numReps, times)}
+                `;
+                tablesContainer.appendChild(tableDiv);
+            });
+            
+            // Restore preserved data
+            restoreExistingData(existingData);
+        }
+
+        function preserveExistingData() {
+            const existingData = {};
+            
+            // Find all existing input fields and save their values
+            const inputs = document.querySelectorAll('[id^="data-"]');
+            inputs.forEach(input => {
+                if (input.value && input.value !== '0') {
+                    existingData[input.id] = input.value;
+                }
+            });
+            
+            return existingData;
+        }
+
+        function restoreExistingData(existingData) {
+            // Wait for DOM to be ready, then restore values
+            setTimeout(() => {
+                Object.keys(existingData).forEach(inputId => {
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        input.value = existingData[inputId];
+                    }
+                });
+            }, 100);
+        }
+
+        function generateDataInputTable(treatmentId, numReps, times) {
+            let headerCols = '<th>Time (h)</th>';
+            let inputCols = '';
+            
+            for (let rep = 1; rep <= numReps; rep++) {
+                headerCols += `<th>Rep${rep}<br>Morbid</th><th>Rep${rep}<br>Dead</th>`;
+            }
+            
+            let rows = '';
+            times.forEach(time => {
+                let row = `<td><strong>${time}h</strong></td>`;
+                for (let rep = 1; rep <= numReps; rep++) {
+                    row += `
+                        <td><input type="number" 
+                                  id="data-${treatmentId}-${time}-${rep}-morbid" 
+                                  min="0" 
+                                  value="0" 
+                                  onchange="validateInput(this)"
+                                  onblur="autoSave()"
+                                  placeholder="0"></td>
+                        <td><input type="number" 
+                                  id="data-${treatmentId}-${time}-${rep}-dead" 
+                                  min="0" 
+                                  value="0"
+                                  onchange="validateInput(this)"
+                                  onblur="autoSave()"
+                                  placeholder="0"></td>
+                    `;
+                }
+                rows += `<tr>${row}</tr>`;
+            });
+            
+            return `
+                <table class="data-input-table">
+                    <thead>
+                        <tr>${headerCols}</tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+                <div style="text-align: center; margin-top: 0.5rem;">
+                    <small style="color: var(--text-secondary); font-style: italic;">
+                        💾 Data auto-saves as you type
+                    </small>
+                </div>
+            `;
+        }
+
+        function validateInput(input) {
+            const value = parseInt(input.value) || 0;
+            const insectsPerRep = getInsectsPerRep();
+            
+            // Validate that total affected doesn't exceed insects per replication
+            if (value > insectsPerRep) {
+                input.style.borderColor = 'var(--warning-color)';
+                input.title = `Warning: Value (${value}) exceeds insects per replication (${insectsPerRep})`;
+            } else {
+                input.style.borderColor = 'var(--border-color)';
+                input.title = '';
+            }
+            
+            // Clear results to indicate data has changed
+            const resultsContent = document.getElementById('results-content');
+            if (resultsContent.innerHTML !== '' && !resultsContent.innerHTML.includes('empty-state')) {
+                const changeNotice = document.createElement('div');
+                changeNotice.className = 'info-box';
+                changeNotice.style.background = 'rgba(214, 114, 41, 0.1)';
+                changeNotice.style.borderColor = 'var(--warning-color)';
+                changeNotice.innerHTML = `
+                    <strong>⚠️ Data Modified!</strong> 
+                    Click "Analyze Complete Experiment" to update results with your changes.
+                `;
+                resultsContent.insertBefore(changeNotice, resultsContent.firstChild);
+            }
+        }
+
+        function autoSave() {
+            // Simple auto-save indication
+            const saveIndicators = document.querySelectorAll('.save-indicator');
+            saveIndicators.forEach(indicator => indicator.remove());
+            
+            // Show save confirmation briefly
+            const indicator = document.createElement('span');
+            indicator.className = 'save-indicator';
+            indicator.style.cssText = `
+                position: fixed; 
+                top: 20px; 
+                right: 20px; 
+                background: var(--success-color); 
+                color: white; 
+                padding: 0.5rem 1rem; 
+                border-radius: 4px; 
+                font-family: 'JetBrains Mono', monospace; 
+                font-size: 0.8rem;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease-in-out;
+            `;
+            indicator.textContent = '💾 Saved';
+            document.body.appendChild(indicator);
+            
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.parentNode.removeChild(indicator);
+                }
+            }, 2000);
+        }
+
+        function getAllTreatments() {
+            const treatments = [];
+            const treatmentElements = document.querySelectorAll('.treatment-item');
+            
+            treatmentElements.forEach(element => {
+                const id = element.id.split('-')[1];
+                const nameInput = document.getElementById(`treatment-name-${id}`);
+                const concInput = document.getElementById(`treatment-conc-${id}`);
+                
+                if (nameInput && concInput && nameInput.value.trim()) {
+                    treatments.push({
+                        id: id,
+                        name: nameInput.value.trim(),
+                        concentration: parseFloat(concInput.value) || 0,
+                        isControl: element.classList.contains('control')
+                    });
+                }
+            });
+            
+            return treatments;
+        }
+
+        function processAllData() {
+            const btnText = document.getElementById('btn-text');
+            const resultsContent = document.getElementById('results-content');
+            
+            // Clear previous results immediately
+            resultsContent.innerHTML = '<div class="empty-state"><span class="loading"></span> Processing your data...</div>';
+            
+            // Show loading state
+            btnText.innerHTML = '<span class="loading"></span> Processing...';
+            
+            try {
+                if (currentAnalysisType === 'probit') {
+                    performProbitAnalysis();
+                } else {
+                    performStandardAnalysis();
+                }
+                
+            } catch (error) {
+                resultsContent.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error:</strong> ${error.message}
+                        <br><small>Please check your data and try again.</small>
+                    </div>
+                `;
+            } finally {
+                btnText.textContent = currentAnalysisType === 'probit' ? 'Perform Probit Analysis' : 'Analyze Experiment Data';
+            }
+        }
+        
+        function performStandardAnalysis() {
+            const experimentTitle = document.getElementById('experiment-title').value || 'Toxicology Experiment';
+            const insectsPerRep = getInsectsPerRep();
+            const numReps = getNumReplications();
+            const times = getObservationTimes();
+            const treatments = getAllTreatments();
+            
+            if (treatments.length === 0) {
+                throw new Error('Please add at least one treatment or control');
+            }
+            
+            let experimentData;
+            
+            if (currentInputMethod === 'table') {
+                experimentData = collectTableData(treatments, times, numReps, insectsPerRep);
+            } else {
+                experimentData = parseCSVData();
+            }
+            
+            // Validate that we have data
+            if (experimentData.length === 0) {
+                throw new Error('No observation data found. Please enter your experimental data.');
+            }
+            
+            // Calculate all results
+            const results = calculateExperimentResults(experimentData, insectsPerRep);
+            
+            // Clear results panel completely before displaying new results
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = '';
+            
+            // Display comprehensive results
+            displayExperimentResults(experimentTitle, results, insectsPerRep);
+            
+            // Add success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'info-box';
+            successDiv.style.background = 'rgba(127, 176, 105, 0.2)';
+            successDiv.style.borderColor = 'var(--success-color)';
+            successDiv.innerHTML = `
+                <strong>✅ Analysis Complete!</strong> 
+                Results updated with current data. You can modify any values above and re-analyze.
+            `;
+            resultsContent.insertBefore(successDiv, resultsContent.firstChild);
+        }
+        
+        function performProbitAnalysis() {
+            const experimentTitle = document.getElementById('experiment-title').value || 'Probit Analysis';
+            const csvData = document.getElementById('csv-data').value.trim();
+            
+            if (!csvData) {
+                throw new Error('Please enter concentration-mortality data for probit analysis');
+            }
+            
+            // Parse probit data
+            const probitData = parseProbitCSVData(csvData);
+            
+            if (probitData.length === 0) {
+                throw new Error('No valid probit data found. Please check the format.');
+            }
+            
+            // Perform probit analysis
+            const probitResults = calculateProbitAnalysis(probitData);
+            
+            // Display probit results
+            displayProbitResults(experimentTitle, probitResults);
+        }
+
+        function collectTableData(treatments, times, numReps, insectsPerRep) {
+            const experimentData = [];
+            
+            treatments.forEach(treatment => {
+                times.forEach(time => {
+                    const observation = {
+                        treatment: treatment.name,
+                        concentration: treatment.concentration,
+                        time: time,
+                        isControl: treatment.isControl,
+                        replications: []
+                    };
+                    
+                    for (let rep = 1; rep <= numReps; rep++) {
+                        const morbidInput = document.getElementById(`data-${treatment.id}-${time}-${rep}-morbid`);
+                        const deadInput = document.getElementById(`data-${treatment.id}-${time}-${rep}-dead`);
+                        
+                        observation.replications.push({
+                            morbid: parseInt(morbidInput?.value) || 0,
+                            dead: parseInt(deadInput?.value) || 0
+                        });
+                    }
+                    
+                    experimentData.push(observation);
+                });
+            });
+            
+            return experimentData;
+        }
+
+        function parseCSVData() {
+            const csvText = document.getElementById('csv-data').value.trim();
+            if (!csvText) {
+                throw new Error('Please enter CSV data');
+            }
+            
+            const experimentData = [];
+            const lines = csvText.split('\n').filter(line => line.trim());
+            
+            lines.forEach(line => {
+                const values = line.split(',').map(v => v.trim());
+                if (values.length >= 7) {
+                    const observation = {
+                        treatment: values[0],
+                        concentration: parseFloat(values[1]) || 0,
+                        time: parseFloat(values[2]),
+                        isControl: values[0].toLowerCase().includes('control'),
+                        replications: []
+                    };
+                    
+                    // Parse replications (morbid, dead pairs)
+                    for (let i = 3; i < values.length; i += 2) {
+                        if (i + 1 < values.length) {
+                            observation.replications.push({
+                                morbid: parseInt(values[i]) || 0,
+                                dead: parseInt(values[i + 1]) || 0
+                            });
+                        }
+                    }
+                    
+                    experimentData.push(observation);
+                }
+            });
+            
+            return experimentData;
+        }
+
+        function calculateExperimentResults(experimentData, insectsPerRep) {
+            // Group data by treatment
+            const treatmentGroups = {};
+            
+            experimentData.forEach(obs => {
+                const key = `${obs.treatment}_${obs.concentration}`;
+                if (!treatmentGroups[key]) {
+                    treatmentGroups[key] = {
+                        treatment: obs.treatment,
+                        concentration: obs.concentration,
+                        isControl: obs.isControl,
+                        observations: []
+                    };
+                }
+                treatmentGroups[key].observations.push(obs);
+            });
+            
+            // Calculate cumulative mortality for each treatment
+            const results = {};
+            Object.keys(treatmentGroups).forEach(key => {
+                const group = treatmentGroups[key];
+                results[key] = calculateTreatmentMortality(group.observations, insectsPerRep);
+                results[key].treatment = group.treatment;
+                results[key].concentration = group.concentration;
+                results[key].isControl = group.isControl;
+            });
+            
+            // Calculate Abbott's correction
+            const controlKey = Object.keys(results).find(key => results[key].isControl);
+            const controlMortality = controlKey ? results[controlKey] : null;
+            
+            Object.keys(results).forEach(key => {
+                if (!results[key].isControl && controlMortality) {
+                    results[key].processedData.forEach(data => {
+                        const controlMortalityAtTime = controlMortality.processedData.find(c => c.time === data.time);
+                        const controlPercent = controlMortalityAtTime ? controlMortalityAtTime.mortalityPercent : 0;
+                        
+                        data.abbottCorrected = controlPercent < 100 ? 
+                            Math.max(0, ((data.mortalityPercent - controlPercent) / (100 - controlPercent)) * 100) : 
+                            data.mortalityPercent;
+                    });
+                }
+            });
+            
+            return results;
+        }
+
+        function calculateTreatmentMortality(observations, insectsPerRep) {
+            const processedData = [];
+            const cumulativeTotalAffected = {}; // Track cumulative morbidity + mortality per replication
+            
+            // Sort observations by time
+            observations.sort((a, b) => a.time - b.time);
+            
+            observations.forEach(obs => {
+                const numReps = obs.replications.length;
+                
+                // Initialize cumulative tracking for this time point if not exists
+                if (!cumulativeTotalAffected[obs.time]) {
+                    cumulativeTotalAffected[obs.time] = new Array(numReps).fill(0);
+                }
+                
+                // For the first time point, just use current observations
+                if (obs.time === observations[0].time) {
+                    obs.replications.forEach((rep, index) => {
+                        cumulativeTotalAffected[obs.time][index] = rep.morbid + rep.dead;
+                    });
+                } else {
+                    // For subsequent time points, add new observations to previous cumulative total
+                    const previousTimePoints = Object.keys(cumulativeTotalAffected)
+                        .map(t => parseFloat(t))
+                        .filter(t => t < obs.time)
+                        .sort((a, b) => b - a); // Get most recent previous time point
+                    
+                    const previousTime = previousTimePoints[0];
+                    const previousCumulative = cumulativeTotalAffected[previousTime] || new Array(numReps).fill(0);
+                    
+                    obs.replications.forEach((rep, index) => {
+                        // Add current morbid + dead to previous cumulative
+                        const newAffected = rep.morbid + rep.dead;
+                        const totalCumulative = previousCumulative[index] + newAffected;
+                        
+                        // Ensure it doesn't exceed insects per replication
+                        cumulativeTotalAffected[obs.time][index] = Math.min(totalCumulative, insectsPerRep);
+                    });
+                }
+                
+                // Calculate mortality percentage
+                const totalAffected = cumulativeTotalAffected[obs.time];
+                const avgAffected = totalAffected.reduce((a, b) => a + b, 0) / totalAffected.length;
+                const mortalityPercent = (avgAffected / insectsPerRep) * 100;
+                
+                processedData.push({
+                    time: obs.time,
+                    morbid: obs.replications.map(r => r.morbid),
+                    dead: obs.replications.map(r => r.dead),
+                    morbidPlusDead: obs.replications.map(r => r.morbid + r.dead),
+                    cumulativeTotalAffected: [...totalAffected],
+                    mortalityPercent: mortalityPercent,
+                    abbottCorrected: mortalityPercent // Will be recalculated if control exists
+                });
+            });
+            
+            return { processedData };
+        }
+
+        function displayExperimentResults(experimentTitle, results, insectsPerRep) {
+            const resultsContent = document.getElementById('results-content');
+            
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem;">
+                    <h3 style="color: var(--primary-color); margin: 0; font-family: 'JetBrains Mono', monospace;">
+                        ${experimentTitle}
+                    </h3>
+                    <div>
+                        <button class="btn btn-small btn-secondary" onclick="toggleRawDataView()" style="font-size: 0.75rem; margin-right: 0.5rem;">
+                            📋 View Raw Data
+                        </button>
+                        <button class="btn btn-small btn-accent" onclick="processAllData()" style="font-size: 0.75rem;">
+                            🔄 Re-analyze
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="raw-data-overview" style="display: none; margin-bottom: 2rem;">
+                    ${generateRawDataOverview(results)}
+                </div>
+            `;
+            
+            // Display each treatment's results
+            Object.keys(results).forEach(key => {
+                const result = results[key];
+                const numReps = result.processedData[0]?.cumulativeTotalAffected.length || 3;
+                
+                html += `
+                    <div class="treatment-results">
+                        <h4 style="color: var(--primary-color); margin-bottom: 1rem;">
+                            ${result.treatment} ${result.isControl ? '' : `(${result.concentration}%)`}
+                            ${result.isControl ? '<span style="color: var(--control-color); font-size: 0.8em;">[CONTROL]</span>' : ''}
+                        </h4>
+                        ${generateResultTable(result.processedData, numReps, !result.isControl)}
+                        ${generateStatistics(result.processedData, result.isControl)}
+                    </div>
+                `;
+            });
+            
+            // Add comparative analysis
+            html += generateComparativeAnalysis(results);
+            
+            resultsContent.innerHTML = html;
+            resultsContent.classList.add('fade-in');
+            
+            // Scroll to results
+            resultsContent.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function generateRawDataOverview(results) {
+            let html = `
+                <div style="background: var(--background-color); padding: 1.5rem; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <h4 style="color: var(--primary-color); margin-bottom: 1rem; font-family: 'JetBrains Mono', monospace;">
+                        📋 Raw Data Overview - All Treatments
+                    </h4>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Treatment</th>
+                                <th>Concentration (%)</th>
+                                <th>Time (h)</th>
+                                <th>Rep 1<br>M | D</th>
+                                <th>Rep 2<br>M | D</th>
+                                <th>Rep 3<br>M | D</th>
+                                <th>Cumulative<br>M+D</th>
+                                <th>Mortality %</th>
+                                <th>Abbott's %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // Sort results by treatment name and concentration
+            const sortedResults = Object.keys(results).sort((a, b) => {
+                const resultA = results[a];
+                const resultB = results[b];
+                if (resultA.isControl !== resultB.isControl) {
+                    return resultA.isControl ? 1 : -1; // Controls at the end
+                }
+                return resultA.treatment.localeCompare(resultB.treatment);
+            });
+            
+            sortedResults.forEach(key => {
+                const result = results[key];
+                const isFirstRow = result.processedData.length > 0;
+                
+                result.processedData.forEach((data, index) => {
+                    const numReps = data.cumulativeTotalAffected.length;
+                    let row = '';
+                    
+                    // Treatment name and concentration (only show on first row)
+                    if (index === 0) {
+                        row += `
+                            <td rowspan="${result.processedData.length}" style="vertical-align: middle; background: ${result.isControl ? 'rgba(108, 117, 125, 0.1)' : 'rgba(127, 176, 105, 0.1)'};">
+                                <strong>${result.treatment}</strong>
+                                ${result.isControl ? '<br><small>[CONTROL]</small>' : ''}
+                            </td>
+                            <td rowspan="${result.processedData.length}" style="vertical-align: middle;">
+                                <strong>${result.concentration}%</strong>
+                            </td>
+                        `;
+                    }
+                    
+                    // Time point
+                    row += `<td><strong>${data.time}h</strong></td>`;
+                    
+                    // Replication data (Morbid | Dead)
+                    for (let rep = 0; rep < Math.min(numReps, 3); rep++) {
+                        const morbid = data.morbid[rep] || 0;
+                        const dead = data.dead[rep] || 0;
+                        row += `<td>${morbid} | ${dead}</td>`;
+                    }
+                    
+                    // If less than 3 reps, fill empty cells
+                    for (let rep = numReps; rep < 3; rep++) {
+                        row += '<td>-</td>';
+                    }
+                    
+                    // Cumulative M+D
+                    const cumulativeStr = data.cumulativeTotalAffected.slice(0, 3).join(', ');
+                    row += `<td><strong>[${cumulativeStr}]</strong></td>`;
+                    
+                    // Mortality % and Abbott's corrected %
+                    row += `<td><strong>${data.mortalityPercent.toFixed(1)}%</strong></td>`;
+                    row += `<td><strong style="color: ${result.isControl ? 'var(--control-color)' : 'var(--accent-color)'};">${data.abbottCorrected.toFixed(1)}%</strong></td>`;
+                    
+                    html += `<tr>${row}</tr>`;
+                });
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
+                        <strong>Legend:</strong> M = Morbid, D = Dead, M+D = Cumulative Morbidity + Mortality per replication
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+        
+        function toggleRawDataView() {
+            const rawDataDiv = document.getElementById('raw-data-overview');
+            const button = document.querySelector('[onclick="toggleRawDataView()"]');
+            
+            if (rawDataDiv.style.display === 'none') {
+                rawDataDiv.style.display = 'block';
+                button.textContent = '📋 Hide Raw Data';
+                rawDataDiv.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                rawDataDiv.style.display = 'none';
+                button.textContent = '📋 View Raw Data';
+            }
+        }
+
+        function generateResultTable(processedData, numReps, showAbbott) {
+            let headerCols = '<th rowspan="2">Time (h)</th>';
+            
+            // Create header for each replication
+            for (let rep = 1; rep <= numReps; rep++) {
+                headerCols += `<th colspan="3">Replication ${rep}</th>`;
+            }
+            headerCols += '<th rowspan="2">Morbidity + Mortality<br>Combined</th>';
+            headerCols += '<th rowspan="2">Mortality %</th>';
+            if (showAbbott) {
+                headerCols += '<th rowspan="2">Abbott\'s<br>Corrected %</th>';
+            }
+            
+            // Sub-header row
+            let subHeaderCols = '';
+            for (let rep = 1; rep <= numReps; rep++) {
+                subHeaderCols += '<th>Morbid</th><th>Dead</th><th>M+D</th>';
+            }
+            
+            let rows = '';
+            processedData.forEach(data => {
+                let row = `<td><strong>${data.time}h</strong></td>`;
+                
+                // Data for each replication
+                for (let rep = 0; rep < numReps; rep++) {
+                    const morbid = data.morbid[rep] || 0;
+                    const dead = data.dead[rep] || 0;
+                    const combined = morbid + dead;
+                    
+                    row += `
+                        <td>${morbid}</td>
+                        <td>${dead}</td>
+                        <td><strong>${combined}</strong></td>
+                    `;
+                }
+                
+                // Combined column showing cumulative totals
+                const combinedStr = data.cumulativeTotalAffected.join(', ');
+                row += `<td><strong>[${combinedStr}]</strong></td>`;
+                
+                row += `<td><strong>${data.mortalityPercent.toFixed(1)}%</strong></td>`;
+                if (showAbbott) {
+                    row += `<td><strong style="color: var(--accent-color);">${data.abbottCorrected.toFixed(1)}%</strong></td>`;
+                }
+                
+                rows += `<tr>${row}</tr>`;
+            });
+            
+            return `
+                <table class="data-table">
+                    <thead>
+                        <tr>${headerCols}</tr>
+                        <tr>${subHeaderCols}</tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                </table>
+                <div style="margin-top: 0.5rem; font-size: 0.8rem; color: var(--text-secondary);">
+                    <strong>Note:</strong> Morbidity + Mortality Combined shows cumulative affected insects per replication [R1, R2, R3...]
+                </div>
+            `;
+        }
+
+        function generateStatistics(processedData, isControl) {
+            let statsHtml = '<div class="calculation-section">';
+            
+            if (!isControl) {
+                // Find LT50
+                const lt50Data = processedData.find(data => data.abbottCorrected >= 50);
+                if (lt50Data) {
+                    statsHtml += `
+                        <div class="calc-result">
+                            <strong>LT50 (Estimated):</strong> ~${lt50Data.time} hours
+                            <br><small>Time at which 50% corrected mortality was first reached</small>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Final mortality
+            const finalData = processedData[processedData.length - 1];
+            if (finalData) {
+                statsHtml += `
+                    <div class="calc-result">
+                        <strong>Final Mortality:</strong> ${finalData.mortalityPercent.toFixed(1)}%
+                        ${!isControl ? `(Abbott's Corrected: ${finalData.abbottCorrected.toFixed(1)}%)` : ''}
+                    </div>
+                `;
+            }
+            
+            statsHtml += '</div>';
+            return statsHtml;
+        }
+
+        function generateComparativeAnalysis(results) {
+            const treatments = Object.keys(results).filter(key => !results[key].isControl);
+            
+            if (treatments.length <= 1) return '';
+            
+            let html = `
+                <div class="calculation-section">
+                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">Comparative Analysis</h4>
+                    <div class="calc-result">
+                        <strong>Treatment Ranking by Final Abbott's Corrected Mortality:</strong><br>
+            `;
+            
+            // Sort treatments by final mortality
+            const ranking = treatments
+                .map(key => {
+                    const result = results[key];
+                    const finalData = result.processedData[result.processedData.length - 1];
+                    return {
+                        name: `${result.treatment} (${result.concentration}%)`,
+                        mortality: finalData.abbottCorrected
+                    };
+                })
+                .sort((a, b) => b.mortality - a.mortality);
+            
+            ranking.forEach((treatment, index) => {
+                html += `${index + 1}. ${treatment.name}: ${treatment.mortality.toFixed(1)}%<br>`;
+            });
+            
+            html += `
+                    </div>
+                    <div class="info-box">
+                        <strong>Abbott's Correction Formula:</strong> 
+                        Corrected Mortality (%) = [(Treatment Mortality % - Control Mortality %) ÷ (100 - Control Mortality %)] × 100
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Initialize with sample data
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                // Add sample treatments
+                addTreatment();
+                document.getElementById('treatment-name-1').value = 'Chlorpyriphos';
+                document.getElementById('treatment-conc-1').value = '0.02';
+                
+                addTreatment();
+                document.getElementById('treatment-name-2').value = 'Cypermethrin';
+                document.getElementById('treatment-conc-2').value = '0.01';
+                
+                addControl();
+                
+                updateTreatmentTables();
+                
+                // Add some sample data to tables
+                setTimeout(() => {
+                    // Chlorpyriphos data
+                    document.getElementById('data-1-6-1-morbid').value = '5';
+                    document.getElementById('data-1-6-2-morbid').value = '3';
+                    document.getElementById('data-1-6-3-morbid').value = '4';
+                    
+                    document.getElementById('data-1-12-1-morbid').value = '2';
+                    document.getElementById('data-1-12-1-dead').value = '3';
+                    document.getElementById('data-1-12-2-morbid').value = '2';
+                    document.getElementById('data-1-12-2-dead').value = '1';
+                    document.getElementById('data-1-12-3-morbid').value = '1';
+                    document.getElementById('data-1-12-3-dead').value = '3';
+                    
+                    // Cypermethrin data  
+                    document.getElementById('data-2-6-1-morbid').value = '3';
+                    document.getElementById('data-2-6-2-morbid').value = '2';
+                    document.getElementById('data-2-6-3-morbid').value = '3';
+                    
+                    document.getElementById('data-2-12-1-morbid').value = '1';
+                    document.getElementById('data-2-12-1-dead').value = '2';
+                    document.getElementById('data-2-12-2-morbid').value = '1';
+                    document.getElementById('data-2-12-2-dead').value = '1';
+                    document.getElementById('data-2-12-3-morbid').value = '0';
+                    document.getElementById('data-2-12-3-dead').value = '3';
+                }, 500);
+                
+            }, 1000);
+        });
+        
+        // ========== PROBIT ANALYSIS FUNCTIONS ==========
+        
+        function parseProbitCSVData(csvText) {
+            const lines = csvText.split('\n').filter(line => line.trim());
+            const probitData = [];
+            
+            lines.forEach(line => {
+                const values = line.split(',').map(v => v.trim());
+                if (values.length >= 5) {
+                    probitData.push({
+                        treatment: values[0],
+                        concentration: parseFloat(values[1]),
+                        insectsTested: parseInt(values[2]),
+                        insectsDead: parseInt(values[3]),
+                        mortalityPercent: parseFloat(values[4])
+                    });
+                }
+            });
+            
+            return probitData;
+        }
+        
+        function calculateProbitAnalysis(probitData) {
+            // Group data by treatment
+            const treatmentGroups = {};
+            
+            probitData.forEach(data => {
+                if (!treatmentGroups[data.treatment]) {
+                    treatmentGroups[data.treatment] = [];
+                }
+                treatmentGroups[data.treatment].push(data);
+            });
+            
+            const results = {};
+            
+            Object.keys(treatmentGroups).forEach(treatment => {
+                const data = treatmentGroups[treatment];
+                
+                // Sort by concentration
+                data.sort((a, b) => a.concentration - b.concentration);
+                
+                // Calculate probit values
+                const probitAnalysis = performProbitCalculation(data);
+                
+                results[treatment] = {
+                    treatment: treatment,
+                    data: data,
+                    analysis: probitAnalysis
+                };
+            });
+            
+            return results;
+        }
+        
+        function performProbitCalculation(data) {
+            // Convert mortality percentages to probits
+            const probitData = data.map(point => {
+                let mortality = Math.max(0.1, Math.min(99.9, point.mortalityPercent)); // Constrain to valid probit range
+                let probitValue = normalInverse(mortality / 100) + 5; // Probit = normsinv + 5
+                let logConcentration = Math.log10(point.concentration);
+                
+                return {
+                    concentration: point.concentration,
+                    logConcentration: logConcentration,
+                    mortality: mortality,
+                    probitValue: probitValue,
+                    insectsTested: point.insectsTested,
+                    insectsDead: point.insectsDead
+                };
+            });
+            
+            // Linear regression: probit vs log concentration
+            const regression = calculateLinearRegression(
+                probitData.map(p => p.logConcentration),
+                probitData.map(p => p.probitValue)
+            );
+            
+            // Calculate LC values
+            const lcValues = calculateLCValues(regression);
+            
+            // Calculate fiducial limits (simplified)
+            const fiducialLimits = calculateFiducialLimits(regression, probitData);
+            
+            // Calculate heterogeneity chi-square
+            const heterogeneity = calculateHeterogeneity(probitData, regression);
+            
+            return {
+                probitData: probitData,
+                regression: regression,
+                lcValues: lcValues,
+                fiducialLimits: fiducialLimits,
+                heterogeneity: heterogeneity
+            };
+        }
+        
+        function normalInverse(p) {
+            // Approximation of the inverse normal distribution for probit transformation
+            if (p <= 0) return -6;
+            if (p >= 1) return 6;
+            
+            const a0 = -3.969683028665376e+01;
+            const a1 = 2.209460984245205e+02;
+            const a2 = -2.759285104469687e+02;
+            const a3 = 1.383577518672690e+02;
+            const a4 = -3.066479806614716e+01;
+            const a5 = 2.506628277459239e+00;
+            
+            const b1 = -5.447609879822406e+01;
+            const b2 = 1.615858368580409e+02;
+            const b3 = -1.556989798598866e+02;
+            const b4 = 6.680131188771972e+01;
+            const b5 = -1.328068155288572e+01;
+            
+            const c0 = -7.784894002430293e-03;
+            const c1 = -3.223964580411365e-01;
+            const c2 = -2.400758277161838e+00;
+            const c3 = -2.549732539343734e+00;
+            const c4 = 4.374664141464968e+00;
+            const c5 = 2.938163982698783e+00;
+            
+            const d1 = 7.784695709041462e-03;
+            const d2 = 3.224671290700398e-01;
+            const d3 = 2.445134137142996e+00;
+            const d4 = 3.754408661907416e+00;
+            
+            const split1 = 0.02425;
+            const split2 = 1 - split1;
+            
+            let x;
+            
+            if (p < split1) {
+                const q = Math.sqrt(-2 * Math.log(p));
+                x = (((((c0 * q + c1) * q + c2) * q + c3) * q + c4) * q + c5) / ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+            } else if (p < split2) {
+                const q = p - 0.5;
+                const r = q * q;
+                x = (((((a0 * r + a1) * r + a2) * r + a3) * r + a4) * r + a5) * q / (((((b1 * r + b2) * r + b3) * r + b4) * r + b5) * r + 1);
+            } else {
+                const q = Math.sqrt(-2 * Math.log(1 - p));
+                x = -(((((c0 * q + c1) * q + c2) * q + c3) * q + c4) * q + c5) / ((((d1 * q + d2) * q + d3) * q + d4) * q + 1);
+            }
+            
+            return x;
+        }
+        
+        function calculateLinearRegression(x, y) {
+            const n = x.length;
+            const sumX = x.reduce((a, b) => a + b, 0);
+            const sumY = y.reduce((a, b) => a + b, 0);
+            const sumXY = x.reduce((acc, xi, i) => acc + xi * y[i], 0);
+            const sumXX = x.reduce((acc, xi) => acc + xi * xi, 0);
+            const sumYY = y.reduce((acc, yi) => acc + yi * yi, 0);
+            
+            const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+            
+            // Calculate R-squared
+            const meanY = sumY / n;
+            const ssTotal = y.reduce((acc, yi) => acc + Math.pow(yi - meanY, 2), 0);
+            const ssResidual = y.reduce((acc, yi, i) => {
+                const predicted = intercept + slope * x[i];
+                return acc + Math.pow(yi - predicted, 2);
+            }, 0);
+            const rSquared = 1 - (ssResidual / ssTotal);
+            
+            // Calculate standard error of slope
+            const mse = ssResidual / (n - 2);
+            const sxx = x.reduce((acc, xi) => acc + Math.pow(xi - sumX/n, 2), 0);
+            const slopeStdError = Math.sqrt(mse / sxx);
+            
+            return {
+                slope: slope,
+                intercept: intercept,
+                rSquared: rSquared,
+                slopeStdError: slopeStdError,
+                equation: `y = ${intercept.toFixed(2)} + ${slope.toFixed(2)}x`
+            };
+        }
+        
+        function calculateLCValues(regression) {
+            // LC values correspond to specific probit values
+            const lcTargets = {
+                LC15: 3.96, // 15% mortality
+                LC25: 4.33, // 25% mortality  
+                LC30: 4.48, // 30% mortality
+                LC50: 5.00, // 50% mortality
+                LC90: 6.28  // 90% mortality
+            };
+            
+            const lcValues = {};
+            
+            Object.keys(lcTargets).forEach(lc => {
+                const probitValue = lcTargets[lc];
+                const logConcentration = (probitValue - regression.intercept) / regression.slope;
+                const concentration = Math.pow(10, logConcentration);
+                lcValues[lc] = concentration;
+            });
+            
+            return lcValues;
+        }
+        
+        function calculateFiducialLimits(regression, data) {
+            // Simplified fiducial limits calculation for LC50
+            const lc50LogConc = (5.0 - regression.intercept) / regression.slope;
+            const n = data.length;
+            
+            // Estimate standard error (simplified)
+            const stdError = Math.abs(regression.slopeStdError / regression.slope) * 0.1; // Approximation
+            
+            const tValue = 2.0; // Approximate t-value for 95% confidence
+            const lower = Math.pow(10, lc50LogConc - tValue * stdError);
+            const upper = Math.pow(10, lc50LogConc + tValue * stdError);
+            
+            return {
+                lower: lower,
+                upper: upper
+            };
+        }
+        
+        function calculateHeterogeneity(data, regression) {
+            // Chi-square test for heterogeneity
+            let chiSquare = 0;
+            
+            data.forEach(point => {
+                const expected = regression.intercept + regression.slope * point.logConcentration;
+                const observed = point.probitValue;
+                chiSquare += Math.pow(observed - expected, 2);
+            });
+            
+            const df = data.length - 2; // Degrees of freedom
+            const isSignificant = chiSquare > 5.99; // Chi-square critical value at p=0.05, df=2 (simplified)
+            
+            return {
+                value: chiSquare,
+                df: df,
+                isSignificant: isSignificant,
+                significance: isSignificant ? 'S' : 'NS'
+            };
+        }
+        
+        function displayProbitResults(experimentTitle, results) {
+            const resultsContent = document.getElementById('results-content');
+            
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem;">
+                    <h3 style="color: var(--primary-color); margin: 0; font-family: 'JetBrains Mono', monospace;">
+                        📊 ${experimentTitle} - Probit Analysis
+                    </h3>
+                    <div>
+                        <button class="btn btn-small btn-secondary" onclick="showProbitGraphs()" style="font-size: 0.75rem; margin-right: 0.5rem;">
+                            📈 View Graphs
+                        </button>
+                        <button class="btn btn-small btn-accent" onclick="processAllData()" style="font-size: 0.75rem;">
+                            🔄 Re-analyze
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Probit Analysis Table
+            html += generateProbitTable(results);
+            
+            // Individual Treatment Details
+            html += generateProbitDetails(results);
+            
+            // Interpretation
+            html += generateProbitInterpretation(results);
+            
+            resultsContent.innerHTML = html;
+            resultsContent.classList.add('fade-in');
+            resultsContent.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function generateProbitTable(results) {
+            let html = `
+                <h4 style="color: var(--primary-color); margin-bottom: 1rem;">Probit Analysis Summary Table</h4>
+                <div style="overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); margin-bottom: 2rem;">
+                    <table class="data-table">
+                        <thead>
+                            <tr style="background: var(--background-color);">
+                                <th style="padding: 8px; font-size: 0.8rem;">S.No.</th>
+                                <th style="padding: 8px; font-size: 0.8rem;">Insecticide</th>
+                                <th style="padding: 8px; font-size: 0.8rem;">Conc Range</th>
+                                <th style="padding: 8px; font-size: 0.8rem; background: rgba(127, 176, 105, 0.1);">LC15</th>
+                                <th style="padding: 8px; font-size: 0.8rem; background: rgba(127, 176, 105, 0.1);">LC25</th>
+                                <th style="padding: 8px; font-size: 0.8rem; background: rgba(127, 176, 105, 0.2);">LC30</th>
+                                <th style="padding: 8px; font-size: 0.8rem; background: rgba(214, 114, 41, 0.1);">LC50</th>
+                                <th style="padding: 8px; font-size: 0.8rem; background: rgba(193, 102, 107, 0.1);">LC90</th>
+                                <th style="padding: 8px; font-size: 0.8rem;">χ²</th>
+                                <th style="padding: 8px; font-size: 0.8rem;">Regression</th>
+                                <th style="padding: 8px; font-size: 0.8rem;">Fiducial Limits</th>
+                                <th style="padding: 8px; font-size: 0.8rem;">R²</th>
+                                <th style="padding: 8px; font-size: 0.8rem;">Slope ± SE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            Object.keys(results).forEach((treatment, index) => {
+                const result = results[treatment];
+                const analysis = result.analysis;
+                const data = result.data;
+                
+                const minConc = Math.min(...data.map(d => d.concentration));
+                const maxConc = Math.max(...data.map(d => d.concentration));
+                
+                html += `
+                    <tr style="background: ${index % 2 === 0 ? 'var(--background-color)' : 'var(--surface-color)'};">
+                        <td style="padding: 8px; text-align: center; font-weight: 500;">${index + 1}</td>
+                        <td style="padding: 8px; text-align: center; font-weight: 500;">${treatment}</td>
+                        <td style="padding: 8px; text-align: center;">${minConc.toFixed(3)} - ${maxConc.toFixed(3)}</td>
+                        <td style="padding: 8px; text-align: center; color: var(--accent-color); font-weight: 500;">${analysis.lcValues.LC15.toFixed(3)}</td>
+                        <td style="padding: 8px; text-align: center; color: var(--accent-color); font-weight: 500;">${analysis.lcValues.LC25.toFixed(3)}</td>
+                        <td style="padding: 8px; text-align: center; color: var(--success-color); font-weight: 500;">${analysis.lcValues.LC30.toFixed(3)}</td>
+                        <td style="padding: 8px; text-align: center; color: var(--warning-color); font-weight: 500;">${analysis.lcValues.LC50.toFixed(3)}</td>
+                        <td style="padding: 8px; text-align: center; color: var(--error-color); font-weight: 500;">${analysis.lcValues.LC90.toFixed(3)}</td>
+                        <td style="padding: 8px; text-align: center;">${analysis.heterogeneity.value.toFixed(2)} ${analysis.heterogeneity.significance}</td>
+                        <td style="padding: 8px; text-align: center; font-family: monospace; font-size: 0.75rem;">${analysis.regression.equation}</td>
+                        <td style="padding: 8px; text-align: center;">${analysis.fiducialLimits.lower.toFixed(3)} - ${analysis.fiducialLimits.upper.toFixed(3)}</td>
+                        <td style="padding: 8px; text-align: center; font-weight: 500;">${analysis.regression.rSquared.toFixed(3)}</td>
+                        <td style="padding: 8px; text-align: center;">${analysis.regression.slope.toFixed(2)} ± ${analysis.regression.slopeStdError.toFixed(3)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            return html;
+        }
+        
+        function generateProbitDetails(results) {
+            let html = `<h4 style="color: var(--primary-color); margin-bottom: 1rem;">Detailed Analysis by Treatment</h4>`;
+            
+            Object.keys(results).forEach(treatment => {
+                const result = results[treatment];
+                const analysis = result.analysis;
+                
+                html += `
+                    <div style="background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1rem; margin-bottom: 1rem;">
+                        <h5 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 1rem;">${treatment}</h5>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div>
+                                <strong>Key Statistics:</strong><br>
+                                <small>LC50: ${analysis.lcValues.LC50.toFixed(3)}</small><br>
+                                <small>R²: ${analysis.regression.rSquared.toFixed(3)}</small><br>
+                                <small>Slope: ${analysis.regression.slope.toFixed(2)} ± ${analysis.regression.slopeStdError.toFixed(3)}</small>
+                            </div>
+                            <div>
+                                <strong>Model Fit:</strong><br>
+                                <small>χ²: ${analysis.heterogeneity.value.toFixed(2)} (${analysis.heterogeneity.significance})</small><br>
+                                <small>Equation: ${analysis.regression.equation}</small><br>
+                                <small>95% FL: ${analysis.fiducialLimits.lower.toFixed(3)} - ${analysis.fiducialLimits.upper.toFixed(3)}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+        
+        function generateProbitInterpretation(results) {
+            let html = `
+                <div style="background: rgba(127, 176, 105, 0.1); border-left: 4px solid var(--accent-color); padding: 1.5rem; margin: 2rem 0; border-radius: 0 8px 8px 0;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 1rem;">📚 Interpretation Guide</h4>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>LC Values Explained:</strong>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem; line-height: 1.6;">
+                            <li><strong>LC15/LC25:</strong> Low lethal concentrations - useful for sub-lethal studies</li>
+                            <li><strong>LC30:</strong> Moderate effect level - often used for field application rates</li>
+                            <li><strong>LC50:</strong> Standard toxicity measure - concentration killing 50% of test insects</li>
+                            <li><strong>LC90:</strong> High kill rate - used for control efficacy assessment</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Statistical Quality Indicators:</strong>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem; line-height: 1.6;">
+                            <li><strong>R² > 0.80:</strong> Good model fit (recommended for publication)</li>
+                            <li><strong>χ² (NS):</strong> Non-significant = good fit to probit model</li>
+                            <li><strong>Narrow Fiducial Limits:</strong> Precise LC50 estimate</li>
+                            <li><strong>Steep Slope:</strong> Consistent response across test population</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <strong>Comparative Toxicity:</strong><br>
+                        <small style="color: var(--text-secondary);">Lower LC50 values indicate higher toxicity. Compare LC50 values between treatments to determine relative potency.</small>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+        
+        function showProbitGraphs() {
+            // This function will be expanded to show interactive graphs
+            alert('Interactive probit graphs will be displayed here. This feature will include:\\n\\n1. Percent Mortality vs Dose graph\\n2. Probit Mortality vs Log Dose graph\\n3. Regression lines with confidence intervals\\n4. Comparative analysis between treatments\\n\\nPlease provide your test data to see the actual implementation.');
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Insect Toxicology Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c5530;
+            --secondary-color: #4a7c59;
+            --accent-color: #7fb069;
+            --background-color: #f8fdf4;
+            --surface-color: #ffffff;
+            --text-primary: #1a3d20;
+            --text-secondary: #4a5d4f;
+            --border-color: #d4e5d8;
+            --success-color: #7fb069;
+            --warning-color: #d67229;
+            --error-color: #c1666b;
+            --control-color: #6c757d;
+            --grid-pattern: linear-gradient(rgba(76, 124, 89, 0.05) 1px, transparent 1px),
+                           linear-gradient(90deg, rgba(76, 124, 89, 0.05) 1px, transparent 1px);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: var(--background-color);
+            background-image: var(--grid-pattern);
+            background-size: 20px 20px;
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .input-panel, .results-panel {
+            background: var(--surface-color);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(44, 85, 48, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-panel::before, .results-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        }
+
+        .results-panel::before {
+            background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+        }
+
+        .panel-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            background: var(--background-color);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background: var(--surface-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(127, 176, 105, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(44, 85, 48, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-accent {
+            background: var(--accent-color);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-control {
+            background: var(--control-color);
+        }
+
+        .btn-danger {
+            background: var(--error-color);
+        }
+
+        .treatment-item {
+            background: var(--background-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .treatment-item.control {
+            border-color: var(--control-color);
+            background: rgba(108, 117, 125, 0.1);
+        }
+
+        .treatment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .treatment-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .remove-btn {
+            background: var(--error-color);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .treatment-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+        }
+
+        .data-input-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            background: var(--surface-color);
+        }
+
+        .data-input-table th,
+        .data-input-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .data-input-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+        }
+
+        .data-input-table input {
+            border: none;
+            background: transparent;
+            padding: 0.25rem;
+            text-align: center;
+            font-size: 0.8rem;
+            width: 100%;
+        }
+
+        .data-input-table input:focus {
+            background: rgba(127, 176, 105, 0.1);
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-panel {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 0.25rem;
+            text-align: center;
+        }
+
+        .data-table th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.7rem;
+        }
+
+        .data-table tr:nth-child(even) {
+            background: var(--background-color);
+        }
+
+        .data-table tr:hover {
+            background: rgba(127, 176, 105, 0.1);
+        }
+
+        .calculation-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .calc-result {
+            background: var(--background-color);
+            border: 2px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 3rem;
+        }
+
+        .info-box {
+            background: rgba(127, 176, 105, 0.1);
+            border-left: 4px solid var(--accent-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background: rgba(193, 102, 107, 0.1);
+            border-left: 4px solid var(--error-color);
+            color: var(--error-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .treatment-results {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .treatment-results:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .treatment-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+
+            .data-table, .data-input-table {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Fade-in animation for results */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tab styling for input methods */
+        .tab-container {
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--accent-color);
+            background: rgba(127, 176, 105, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="title">Advanced Toxicology Analyzer</h1>
+            <p class="subtitle">Complete bioassay analysis for multiple insecticides, concentrations, and controls with Abbott's Correction</p>
+        </header>
+
+        <div class="main-content">
+            <div class="input-panel">
+                <h2 class="panel-title">Experiment Setup</h2>
+                
+                <div class="form-group">
+                    <label for="experiment-title">Experiment Title</label>
+                    <input type="text" id="experiment-title" placeholder="e.g., Insecticide Efficacy Study - March 2024">
+                </div>
+
+                <div class="form-group">
+                    <label for="insects-per-rep">Insects per Replication</label>
+                    <select id="insects-per-rep" onchange="toggleCustomInsects()">
+                        <option value="10">10 insects/replication</option>
+                        <option value="15">15 insects/replication</option>
+                        <option value="20">20 insects/replication</option>
+                        <option value="25">25 insects/replication</option>
+                        <option value="30">30 insects/replication</option>
+                        <option value="50">50 insects/replication</option>
+                        <option value="custom">Custom number</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="custom-insects-group" style="display: none;">
+                    <label for="custom-insects">Custom Insects per Replication</label>
+                    <input type="number" id="custom-insects" min="1" placeholder="Enter number">
+                </div>
+
+                <div class="form-group">
+                    <label for="num-replications">Number of Replications</label>
+                    <select id="num-replications" onchange="updateTreatmentTables()">
+                        <option value="3">3 replications</option>
+                        <option value="4">4 replications</option>
+                        <option value="5">5 replications</option>
+                        <option value="6">6 replications</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="observation-times">Observation Time Points (hours)</label>
+                    <input type="text" id="observation-times" value="6, 12, 24, 48" placeholder="e.g., 6, 12, 24, 48" onchange="updateTreatmentTables()">
+                    <small style="color: var(--text-secondary); font-size: 0.85rem;">Comma-separated values in hours</small>
+                </div>
+
+                <h3 class="panel-title" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--secondary-color);">Treatments Setup</h3>
+
+                <div id="treatments-container">
+                    <!-- Treatments will be added dynamically -->
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="btn btn-accent" onclick="addTreatment()">
+                        + Add Treatment
+                    </button>
+                    <button type="button" class="btn btn-control" style="margin-left: 0.5rem;" onclick="addControl()">
+                        + Add Control
+                    </button>
+                </div>
+
                 <h3 class="panel-title" style="margin-top: 2rem; margin-bottom: 1rem; color: var(--secondary-color);">Data Input Method</h3>
 
                 <div class="tab-container">
