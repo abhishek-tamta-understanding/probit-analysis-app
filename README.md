@@ -1,2 +1,0 @@
-The issues that I have faced here are as follows: a) If I have already added some data in the tables and for some reason I have forgotten to add, let's say another hour, then if I add another hour, my whole added data get errased, and then I have to re-enter the same data. b) Once the "Analyse complete experiment" button is clicked, and then I want to change the figures in the control or for that reason in any other treatment, then I click the "Analyze complete experiment" again, I am not able to find the changes in the analysis results.
-
