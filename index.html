@@ -2,358 +2,929 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Insect Toxicology Analyzer</title>
-
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Libre+Baskerville&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-:root{
---bg:#f5f7f0;
---card:#ffffff;
---primary:#2d5a1b;
---accent:#8ab840;
---text:#1e2e18;
---muted:#6c7a65;
---warn:#d4763a;
---border:#d5e0c5;
+:root {
+  --bg: #f2efe8;
+  --surface: #faf9f5;
+  --surface2: #f0ede5;
+  --border: #d8d2c4;
+  --border-light: #e8e3da;
+  --primary: #1e3a1a;
+  --primary-light: #2d5526;
+  --accent: #5a8a3a;
+  --accent-soft: #dcebd0;
+  --warn: #8a4a1a;
+  --warn-bg: #f5e8d8;
+  --text: #1a1f18;
+  --text-secondary: #5a6050;
+  --text-muted: #8a9080;
+  --mono: 'DM Mono', monospace;
+  --serif: 'Instrument Serif', serif;
+  --sans: 'Outfit', sans-serif;
 }
 
-body{
-margin:0;
-padding:2rem;
-background:var(--bg);
-font-family:'Libre Baskerville',serif;
-color:var(--text);
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
 }
 
-h1{
-font-size:1.5rem;
-margin-bottom:1rem;
-color:var(--primary);
+/* Subtle dot-grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, #b8c4a8 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.panel{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:10px;
-padding:1rem;
-margin-bottom:1.5rem;
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem 5rem;
 }
 
-input,select{
-font-family:'JetBrains Mono';
-padding:0.4rem;
-border:1px solid var(--border);
-border-radius:6px;
+/* ——— HEADER ——— */
+.header {
+  margin-bottom: 3.5rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
-button{
-background:var(--primary);
-color:white;
-border:none;
-padding:0.6rem 1rem;
-border-radius:6px;
-cursor:pointer;
-font-family:'JetBrains Mono';
+.header-left {}
+
+.header-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-bottom: 0.75rem;
 }
 
-button:hover{
-background:#3c7a25;
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 400;
+  color: var(--primary);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:1rem;
-font-family:'JetBrains Mono';
-font-size:0.75rem;
+h1 em {
+  font-style: italic;
+  color: var(--accent);
 }
 
-td,th{
-border:1px solid var(--border);
-padding:4px;
-text-align:center;
+.header-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  font-weight: 300;
 }
 
-th{
-background:var(--primary);
-color:white;
+.header-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 
-.result{
-background:white;
-border:1px solid var(--border);
-border-radius:10px;
-padding:1rem;
-margin-top:1rem;
+.badge-item {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
 }
 
-.warn{
-background:#fff4e5;
-border-left:4px solid var(--warn);
-padding:0.5rem;
-margin-bottom:1rem;
-font-size:0.8rem;
+/* ——— CARDS ——— */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  animation: fadeUp 0.4s ease both;
 }
 
-.stat{
-background:#f7f9f3;
-border:1px solid var(--border);
-padding:0.6rem;
-border-radius:6px;
-margin-top:0.5rem;
+.card + .card { margin-top: 0; }
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.card-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.card-index {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--border);
+}
+
+/* ——— SETUP GRID ——— */
+.setup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.field input, .field select {
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a9080' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+.field input:focus, .field select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(90,138,58,0.12);
+}
+
+/* ——— BUTTONS ——— */
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 8px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-secondary);
+}
+
+.btn:hover {
+  border-color: var(--primary-light);
+  color: var(--primary);
+  background: var(--accent-soft);
+}
+
+.btn.btn-primary {
+  background: var(--primary);
+  color: #e8f0e0;
+  border-color: var(--primary);
+  font-size: 12px;
+  padding: 11px 22px;
+}
+
+.btn.btn-primary:hover {
+  background: var(--primary-light);
+  border-color: var(--primary-light);
+}
+
+.btn.btn-danger {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  padding: 4px 8px;
+  font-size: 10px;
+  margin-left: auto;
+}
+
+.btn.btn-danger:hover {
+  color: var(--warn);
+}
+
+/* ——— TREATMENT ITEMS ——— */
+.treatment-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  animation: fadeUp 0.25s ease both;
+}
+
+.treatment-item .field {
+  flex: 1;
+  min-width: 120px;
+}
+
+.treatment-item .field input {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+.ctrl-pill {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid #c0d8a8;
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+/* ——— DATA TABLES ——— */
+.t-section-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 1.5rem 0 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.t-section-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 12px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.t-section-title:first-child { margin-top: 0; }
+
+.data-table-wrap { overflow-x: auto; }
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 11px;
+  min-width: 420px;
+}
+
+table.data-table th {
+  padding: 7px 8px;
+  text-align: center;
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+table.data-table th:first-child { text-align: left; }
+
+table.data-table td {
+  padding: 4px 6px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-light);
+}
+
+table.data-table td:first-child {
+  text-align: left;
+  color: var(--text-muted);
+  font-size: 10px;
+  padding-left: 8px;
+  letter-spacing: 0.06em;
+}
+
+table.data-table input {
+  width: 56px;
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 5px 6px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+table.data-table input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+
+.alive-col { color: var(--text-secondary); }
+.dead-col { color: var(--warn); }
+
+/* ——— ANALYZE BUTTON ——— */
+.analyze-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 1.5rem 0;
+}
+
+/* ——— RESULTS ——— */
+.results-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.results-title {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--primary);
+}
+
+.results-divider {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.warn-box {
+  background: var(--warn-bg);
+  border-left: 3px solid var(--warn);
+  padding: 10px 14px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--warn);
+  border-radius: 0 3px 3px 0;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* Mortality table */
+.mortality-table-wrap { overflow-x: auto; }
+
+table.mortality-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12px;
+  min-width: 360px;
+}
+
+table.mortality-table th {
+  padding: 9px 14px;
+  background: var(--primary);
+  color: #c8d8b8;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+table.mortality-table th:first-child { text-align: left; }
+
+table.mortality-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+table.mortality-table td:first-child {
+  font-size: 12px;
+  color: var(--text);
+}
+
+table.mortality-table tr:last-child td { border-bottom: none; }
+
+.bar-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--border-light);
+  border-radius: 2px;
+  overflow: hidden;
+  min-width: 50px;
+  max-width: 100px;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.5s ease;
+}
+
+.bar-num {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  min-width: 38px;
+  text-align: right;
+}
+
+/* Probit cards */
+.probit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.probit-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.probit-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--primary));
+}
+
+.probit-name {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.probit-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.pstat {
+  background: var(--surface2);
+  border-radius: 3px;
+  padding: 10px 8px;
+  text-align: center;
+}
+
+.pstat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.pstat-val {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.results-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+/* ——— ANIMATIONS ——— */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card { animation-fill-mode: both; }
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.15s; }
+
+/* ——— RESPONSIVE ——— */
+@media (max-width: 600px) {
+  .page { padding: 1.5rem 1rem 3rem; }
+  .header { flex-direction: column; align-items: flex-start; }
+  .header-badge { align-items: flex-start; }
 }
 </style>
 </head>
-
 <body>
 
-<h1>🔬 Insect Toxicology Analyzer</h1>
+<div class="page">
 
-<div class="panel">
-Insects/rep:
-<select id="n"><option>10</option><option selected>30</option></select>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-tag">Bioassay Tool</div>
+      <h1>Insect <em>Toxicology</em><br>Analyzer</h1>
+      <p class="header-desc">Probit analysis · Abbott's correction · LC₅₀ / LC₉₀ estimation</p>
+    </div>
+    <div class="header-badge">
+      <span class="badge-item">v1.0.0</span>
+      <span class="badge-item">Weighted least-squares</span>
+      <span class="badge-item">No server required</span>
+    </div>
+  </div>
 
-Replications:
-<select id="rep"><option>2</option><option selected>3</option></select>
+  <!-- SETUP -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">01 — Experiment setup</span>
+      <span class="card-index">CONFIG</span>
+    </div>
+    <div class="setup-grid">
+      <div class="field">
+        <label>Insects per rep</label>
+        <select id="n">
+          <option>10</option>
+          <option selected>30</option>
+          <option>50</option>
+          <option>100</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Replications</label>
+        <select id="rep">
+          <option>2</option>
+          <option selected>3</option>
+          <option>4</option>
+          <option>5</option>
+        </select>
+      </div>
+      <div class="field" style="flex:2;min-width:200px">
+        <label>Observation times (h)</label>
+        <input id="times" value="24,48,72" placeholder="e.g. 24,48,72" oninput="build()">
+      </div>
+    </div>
+  </div>
 
-Time (h):
-<input id="times" value="24,48,72">
+  <!-- TREATMENTS -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">02 — Treatments</span>
+      <span class="card-index">GROUPS</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="addTreatment()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Add treatment
+      </button>
+      <button class="btn" onclick="addControl()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Add control
+      </button>
+    </div>
+    <div id="treatments"></div>
+    <div id="empty-state" class="empty-state">No treatments added yet</div>
+  </div>
+
+  <!-- DATA INPUT -->
+  <div class="card" id="data-card" style="display:none">
+    <div class="card-header">
+      <span class="card-title">03 — Mortality data</span>
+      <span class="card-index">INPUT</span>
+    </div>
+    <div id="tables"></div>
+  </div>
+
+  <!-- ANALYZE -->
+  <div class="analyze-row">
+    <button class="btn btn-primary" onclick="analyze()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Run analysis
+    </button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="result"></div>
+
 </div>
-
-<div class="panel">
-<button onclick="addTreatment()">+ Treatment</button>
-<button onclick="addControl()">+ Control</button>
-<div id="treatments"></div>
-</div>
-
-<div class="panel" id="tables"></div>
-
-<button onclick="analyze()">🔬 Analyze</button>
-
-<div id="result"></div>
 
 <script>
+let tid = 0;
 
-let tid=0;
-
-function getTimes(){
-return document.getElementById("times").value.split(",").map(x=>+x.trim());
+function getTimes() {
+  return document.getElementById("times").value.split(",").map(x => +x.trim()).filter(x => x > 0);
 }
-function getN(){return +document.getElementById("n").value;}
-function getRep(){return +document.getElementById("rep").value;}
+function getN() { return +document.getElementById("n").value; }
+function getRep() { return +document.getElementById("rep").value; }
 
-function getTreatments(){
-let arr=[];
-document.querySelectorAll(".t").forEach(el=>{
-let id=el.dataset.id;
-let name=document.getElementById("name-"+id).value;
-let conc=+document.getElementById("conc-"+id).value||0;
-let ctrl=el.classList.contains("ctrl");
-if(name) arr.push({id,name,conc,ctrl});
-});
-return arr;
+function getTreatments() {
+  let arr = [];
+  document.querySelectorAll(".t-item").forEach(el => {
+    let id = el.dataset.id;
+    let name = document.getElementById("name-" + id).value.trim();
+    let concEl = document.getElementById("conc-" + id);
+    let conc = concEl ? +concEl.value || 0 : 0;
+    let ctrl = el.dataset.ctrl === "1";
+    if (name) arr.push({ id, name, conc, ctrl });
+  });
+  return arr;
 }
 
-function addTreatment(){
-tid++;
-let d=document.createElement("div");
-d.className="t";
-d.dataset.id=tid;
-d.innerHTML=`Name:<input id="name-${tid}"> Conc:<input id="conc-${tid}">`;
-document.getElementById("treatments").appendChild(d);
+function updateEmpty() {
+  let count = document.querySelectorAll(".t-item").length;
+  document.getElementById("empty-state").style.display = count ? "none" : "";
+}
+
+function addTreatment() {
+  tid++;
+  let d = document.createElement("div");
+  d.className = "treatment-item t-item";
+  d.dataset.id = tid;
+  d.dataset.ctrl = "0";
+  d.innerHTML = `
+    <div class="field">
+      <label>Name</label>
+      <input id="name-${tid}" placeholder="e.g. Extract A" oninput="build()">
+    </div>
+    <div class="field">
+      <label>Concentration</label>
+      <input id="conc-${tid}" placeholder="0.5" type="number" step="any" min="0" oninput="build()">
+    </div>
+    <button class="btn btn-danger" onclick="removeT(${tid})" title="Remove">✕ remove</button>`;
+  document.getElementById("treatments").appendChild(d);
+  updateEmpty();
+  build();
+}
+
+function addControl() {
+  tid++;
+  let d = document.createElement("div");
+  d.className = "treatment-item t-item";
+  d.dataset.id = tid;
+  d.dataset.ctrl = "1";
+  d.innerHTML = `
+    <div class="field">
+      <label>Name</label>
+      <input id="name-${tid}" value="Control" oninput="build()">
+    </div>
+    <span class="ctrl-pill">control</span>
+    <button class="btn btn-danger" onclick="removeT(${tid})" title="Remove">✕ remove</button>`;
+  document.getElementById("treatments").appendChild(d);
+  updateEmpty();
+  build();
+}
+
+function removeT(id) {
+  document.querySelector(`.t-item[data-id="${id}"]`)?.remove();
+  updateEmpty();
+  build();
+}
+
+function build() {
+  let t = getTreatments();
+  let times = getTimes();
+  let rep = getRep();
+  let card = document.getElementById("data-card");
+
+  if (!t.length || !times.length) { card.style.display = "none"; return; }
+  card.style.display = "";
+
+  let html = "";
+  t.forEach(tr => {
+    let conc = tr.ctrl ? "" : tr.conc ? ` <span style="opacity:0.6;font-size:9px">(${tr.conc})</span>` : "";
+    html += `<div class="t-section-title">${tr.name}${conc}</div>`;
+    html += `<div class="data-table-wrap"><table class="data-table"><thead><tr><th>Time</th>`;
+    for (let r = 1; r <= rep; r++) {
+      html += `<th class="alive-col">Rep ${r} alive</th><th class="dead-col">Rep ${r} dead</th>`;
+    }
+    html += `</tr></thead><tbody>`;
+    times.forEach(time => {
+      html += `<tr><td>${time}h</td>`;
+      for (let r = 1; r <= rep; r++) {
+        html += `<td><input id="m-${tr.id}-${time}-${r}" value="0" type="number" min="0"></td>`;
+        html += `<td><input id="d-${tr.id}-${time}-${r}" value="0" type="number" min="0"></td>`;
+      }
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>`;
+  });
+
+  document.getElementById("tables").innerHTML = html;
+}
+
+function normalInv(p) {
+  const a = [2.515517, 0.802853, 0.010328];
+  const b = [1.432788, 0.189269, 0.001308];
+  function f(t) { return (a[0] + t * (a[1] + t * a[2])) / (1 + t * (b[0] + t * (b[1] + t * b[2]))); }
+  if (p < 0.5) { let t = Math.sqrt(-2 * Math.log(p)); return -(t - f(t)); }
+  let t = Math.sqrt(-2 * Math.log(1 - p)); return t - f(t);
+}
+
+function analyze() {
+  let t = getTreatments();
+  let times = getTimes();
+  let rep = getRep();
+  let n = getN();
+
+  if (!t.length) { alert("Please add at least one treatment."); return; }
+
+  let warn = [];
+  let data;
+
+  try {
+    data = t.map(tr => {
+      let cumDead = Array(rep).fill(0);
+      let td = times.map(time => {
+        let affected = [];
+        for (let r = 1; r <= rep; r++) {
+          let m = +document.getElementById(`m-${tr.id}-${time}-${r}`).value || 0;
+          let d = +document.getElementById(`d-${tr.id}-${time}-${r}`).value || 0;
+          if (m + d > n) throw new Error(`Data error: alive + dead > ${n} for ${tr.name} at ${time}h rep ${r}`);
+          cumDead[r - 1] += d;
+          let total = Math.min(cumDead[r - 1] + m, n);
+          affected.push(total);
+        }
+        let avg = affected.reduce((a, b) => a + b) / rep;
+        let pct = avg / n * 100;
+        return { time, pct, abbott: pct };
+      });
+      return { ...tr, timeData: td };
+    });
+  } catch (e) { alert(e.message); return; }
+
+  let ctrl = data.find(x => x.ctrl);
+  data.forEach(tr => {
+    if (tr.ctrl) return;
+    tr.timeData.forEach(td => {
+      let cp = ctrl?.timeData.find(c => c.time === td.time)?.pct || 0;
+      if (cp >= 100) { td.abbott = NaN; warn.push(`Control mortality = 100% at ${td.time}h — Abbott correction undefined.`); return; }
+      if (cp > 20) warn.push(`Control mortality >20% at ${td.time}h — interpret with caution.`);
+      td.abbott = Math.max(0, (td.pct - cp) / (100 - cp) * 100);
+    });
+  });
+
+  let probit = {};
+  data.filter(x => !x.ctrl && x.conc > 0).forEach(tr => {
+    if (!probit[tr.name]) probit[tr.name] = [];
+    let last = tr.timeData.at(-1);
+    probit[tr.name].push({ conc: tr.conc, m: last.abbott, n: n * rep });
+  });
+
+  // Build results HTML
+  let html = `<div style="animation:fadeUp 0.4s ease">`;
+
+  // warnings
+  [...new Set(warn)].forEach(w => { html += `<div class="warn-box">⚠ ${w}</div>`; });
+
+  // mortality section
+  html += `<div class="card">
+    <div class="card-header"><span class="card-title">Results — Corrected mortality (%)</span><span class="card-index">ABBOTT</span></div>`;
+
+  let treatments = data.filter(x => !x.ctrl);
+  if (treatments.length) {
+    html += `<div class="mortality-table-wrap"><table class="mortality-table"><thead><tr><th>Treatment</th>`;
+    times.forEach(t => html += `<th>${t}h</th>`);
+    html += `</tr></thead><tbody>`;
+    treatments.forEach(tr => {
+      html += `<tr><td>${tr.name}${tr.conc ? ` <span style="font-size:10px;color:var(--text-muted);font-family:var(--mono)">${tr.conc}</span>` : ''}</td>`;
+      tr.timeData.forEach(td => {
+        let v = isNaN(td.abbott) ? '—' : td.abbott.toFixed(1);
+        let pct = isNaN(td.abbott) ? 0 : td.abbott;
+        html += `<td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,pct)}%"></div></div><span class="bar-num">${v}${isNaN(td.abbott)?'':'%'}</span></div></td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table></div>`;
+  } else {
+    html += `<p style="color:var(--text-muted);font-size:13px;font-family:var(--mono)">No non-control treatments found.</p>`;
+  }
+  html += `</div>`;
+
+  // probit section
+  let probitKeys = Object.keys(probit);
+  if (probitKeys.length) {
+    html += `<div class="card">
+      <div class="card-header"><span class="card-title">Results — Probit analysis</span><span class="card-index">LC</span></div>
+      <div class="probit-grid">`;
+
+    probitKeys.forEach(name => {
+      let pts = probit[name];
+      if (pts.length < 2) {
+        html += `<div class="probit-card"><div class="probit-name">${name}</div><p style="font-size:12px;font-family:var(--mono);color:var(--text-muted)">Insufficient data points (need ≥2 concentrations).</p></div>`;
+        return;
+      }
+      let X = [], Y = [], W = [];
+      pts.forEach(p => {
+        let corr = 0.5 / p.n;
+        let m = Math.max(corr * 100, Math.min(100 - corr * 100, p.m));
+        let prob = normalInv(m / 100) + 5;
+        let logc = Math.log10(p.conc);
+        let w = p.n * (m / 100) * (1 - m / 100);
+        X.push(logc); Y.push(prob); W.push(w);
+      });
+      let sw=0, swX=0, swY=0, swXX=0, swXY=0;
+      for (let i = 0; i < X.length; i++) {
+        sw += W[i]; swX += W[i]*X[i]; swY += W[i]*Y[i]; swXX += W[i]*X[i]*X[i]; swXY += W[i]*X[i]*Y[i];
+      }
+      let slope = (sw*swXY - swX*swY) / (sw*swXX - swX*swX);
+      let intercept = (swY - slope*swX) / sw;
+      let lc50 = Math.pow(10, (5 - intercept) / slope);
+      let lc90 = Math.pow(10, (6.282 - intercept) / slope);
+      let lc10 = Math.pow(10, (3.718 - intercept) / slope);
+
+      html += `<div class="probit-card">
+        <div class="probit-name">${name}</div>
+        <div class="probit-stats">
+          <div class="pstat"><div class="pstat-label">LC₁₀</div><div class="pstat-val">${lc10.toFixed(4)}</div></div>
+          <div class="pstat"><div class="pstat-label">LC₅₀</div><div class="pstat-val">${lc50.toFixed(4)}</div></div>
+          <div class="pstat"><div class="pstat-label">LC₉₀</div><div class="pstat-val">${lc90.toFixed(4)}</div></div>
+        </div>
+        <div style="margin-top:10px;font-family:var(--mono);font-size:10px;color:var(--text-muted);letter-spacing:0.04em">Slope b = ${slope.toFixed(3)} · Intercept a = ${intercept.toFixed(3)}</div>
+      </div>`;
+    });
+    html += `</div>`;
+    html += `<div class="results-footer">Lower LC₅₀ indicates higher toxicity. Concentrations must be in consistent units. LC values estimated from weighted probit regression (Finney method).</div>`;
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  document.getElementById("result").innerHTML = html;
+  document.getElementById("result").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 build();
-}
-
-function addControl(){
-tid++;
-let d=document.createElement("div");
-d.className="t ctrl";
-d.dataset.id=tid;
-d.innerHTML=`Control:<input id="name-${tid}" value="Control">`;
-document.getElementById("treatments").appendChild(d);
-build();
-}
-
-function build(){
-let t=getTreatments();
-let times=getTimes();
-let rep=getRep();
-
-let html="";
-
-t.forEach(tr=>{
-html+=`<h4>${tr.name}</h4><table><tr><th>Time</th>`;
-for(let r=1;r<=rep;r++) html+=`<th>M${r}</th><th>D${r}</th>`;
-html+="</tr>";
-
-times.forEach(time=>{
-html+=`<tr><td>${time}</td>`;
-for(let r=1;r<=rep;r++){
-html+=`<td><input id="m-${tr.id}-${time}-${r}" value="0"></td>`;
-html+=`<td><input id="d-${tr.id}-${time}-${r}" value="0"></td>`;
-}
-html+="</tr>";
-});
-
-html+="</table>";
-});
-
-document.getElementById("tables").innerHTML=html;
-}
-
-function normalInv(p){
-const a=[2.515517,0.802853,0.010328];
-const b=[1.432788,0.189269,0.001308];
-function f(t){return (a[0]+t*(a[1]+t*a[2]))/(1+t*(b[0]+t*(b[1]+t*b[2])));}
-if(p<0.5){let t=Math.sqrt(-2*Math.log(p));return -(t-f(t));}
-let t=Math.sqrt(-2*Math.log(1-p));return t-f(t);
-}
-
-function analyze(){
-
-let t=getTreatments();
-let times=getTimes();
-let rep=getRep();
-let n=getN();
-
-let warn=[];
-
-// STEP 1
-let data=t.map(tr=>{
-let cumDead=Array(rep).fill(0);
-
-let td=times.map(time=>{
-let affected=[];
-
-for(let r=1;r<=rep;r++){
-let m=+document.getElementById(`m-${tr.id}-${time}-${r}`).value;
-let d=+document.getElementById(`d-${tr.id}-${time}-${r}`).value;
-
-if(m+d>n) throw Error("Invalid input");
-
-cumDead[r-1]+=d;
-let total=Math.min(cumDead[r-1]+m,n);
-
-affected.push(total);
-}
-
-let avg=affected.reduce((a,b)=>a+b)/rep;
-let pct=avg/n*100;
-
-return {time,pct,abbott:pct};
-});
-
-return {...tr,timeData:td};
-});
-
-// STEP 2
-let ctrl=data.find(x=>x.ctrl);
-
-data.forEach(tr=>{
-if(tr.ctrl) return;
-
-tr.timeData.forEach(td=>{
-let cp=ctrl?.timeData.find(c=>c.time==td.time)?.pct||0;
-
-if(cp>=100){td.abbott=NaN;warn.push("Control=100%");return;}
-if(cp>20) warn.push("Control >20%");
-
-td.abbott=Math.max(0,(td.pct-cp)/(100-cp)*100);
-});
-});
-
-// STEP 3 PROBIT
-let probit={};
-
-data.filter(x=>!x.ctrl).forEach(tr=>{
-if(!probit[tr.name]) probit[tr.name]=[];
-
-let last=tr.timeData.at(-1);
-
-probit[tr.name].push({
-conc:tr.conc,
-m:last.abbott,
-n:n*rep
-});
-});
-
-let html="<div class='result'>";
-
-// warnings
-[...new Set(warn)].forEach(w=>{
-html+=`<div class="warn">${w}</div>`;
-});
-
-// mortality
-data.forEach(tr=>{
-html+=`<h4>${tr.name}</h4>`;
-tr.timeData.forEach(td=>{
-html+=`<div>Time ${td.time}h → ${td.abbott.toFixed(2)}%</div>`;
-});
-});
-
-// probit
-html+="<hr><h3>Probit Analysis</h3>";
-
-Object.keys(probit).forEach(name=>{
-let pts=probit[name];
-
-if(pts.length<2){
-html+=`<div>${name}: insufficient data</div>`;
-return;
-}
-
-let X=[],Y=[],W=[];
-
-pts.forEach(p=>{
-let corr=0.5/p.n;
-let m=Math.max(corr*100,Math.min(100-corr*100,p.m));
-
-let prob=normalInv(m/100)+5;
-let logc=Math.log10(p.conc);
-
-let w=p.n*(m/100)*(1-m/100);
-
-X.push(logc);Y.push(prob);W.push(w);
-});
-
-let sw=0,swX=0,swY=0,swXX=0,swXY=0;
-
-for(let i=0;i<X.length;i++){
-sw+=W[i];
-swX+=W[i]*X[i];
-swY+=W[i]*Y[i];
-swXX+=W[i]*X[i]*X[i];
-swXY+=W[i]*X[i]*Y[i];
-}
-
-let slope=(sw*swXY-swX*swY)/(sw*swXX-swX*swX);
-let intercept=(swY-slope*swX)/sw;
-
-let lc50=Math.pow(10,(5-intercept)/slope);
-
-html+=`
-<div class="stat">
-<strong>${name}</strong><br>
-LC₅₀: ${lc50.toFixed(4)}<br>
-Slope: ${slope.toFixed(3)}
-</div>`;
-});
-
-html+=`
-<div style="margin-top:1rem;font-size:0.85rem;color:var(--muted)">
-Lower LC₅₀ → higher toxicity
-</div>`;
-
-html+="</div>";
-
-document.getElementById("result").innerHTML=html;
-}
-
-build();
-
 </script>
-
 </body>
 </html>
