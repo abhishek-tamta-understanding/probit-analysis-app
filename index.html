@@ -1,85 +1,1308 @@
-<!-- LEFT: Input Panel -->
-    <div>
-        <div class="panel">
-            <div class="panel-header">⚙️ Experiment Setup</div>
-            <div class="panel-body">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Insect Toxicology Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f7f0;
+            --surface: #ffffff;
+            --surface2: #eef3e8;
+            --primary: #2d5a1b;
+            --primary-light: #4a8a2d;
+            --accent: #8ab840;
+            --accent2: #c8a84b;
+            --danger: #c1453a;
+            --warn: #d4763a;
+            --control: #607080;
+            --text: #1e2e18;
+            --text2: #4a5e40;
+            --text3: #7a8e72;
+            --border: #ccd8bc;
+            --border2: #b0c09a;
+            --shadow: 0 2px 12px rgba(45,90,27,0.10);
+            --shadow-lg: 0 8px 32px rgba(45,90,27,0.14);
+            --radius: 10px;
+            --radius-sm: 6px;
+        }
 
-                <div class="section-title">General Parameters</div>
+        * { margin:0; padding:0; box-sizing:border-box; }
 
-                <div class="form-group">
-                    <label>Experiment Title</label>
-                    <input type="text" id="exp-title" placeholder="e.g., Insecticide Efficacy Study – April 2025">
-                </div>
+        body {
+            font-family: 'Libre Baskerville', serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            background-image:
+                radial-gradient(circle at 20% 20%, rgba(138,184,64,0.06) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(45,90,27,0.05) 0%, transparent 50%);
+        }
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Insects per Replication</label>
-                        <select id="insects-per-rep" onchange="handleInsectsChange()">
-                            <option value="10">10</option>
-                            <option value="15">15</option>
-                            <option value="20">20</option>
-                            <option value="25">25</option>
-                            <option value="30" selected>30</option>
-                            <option value="50">50</option>
-                            <option value="custom">Custom…</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="custom-group" style="display:none">
-                        <label>Custom Count</label>
-                        <input type="number" id="custom-count" min="1" placeholder="e.g., 40" onchange="rebuildTables()">
-                    </div>
-                    <div class="form-group">
-                        <label>Replications</label>
-                        <select id="num-reps" onchange="rebuildTables()">
-                            <option value="2">2</option>
-                            <option value="3" selected>3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                        </select>
-                    </div>
-                </div>
+        /* ── HEADER ── */
+        header {
+            background: var(--primary);
+            color: #fff;
+            padding: 1.8rem 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            box-shadow: var(--shadow-lg);
+        }
+        .header-icon {
+            font-size: 2.8rem;
+            filter: brightness(1.3);
+        }
+        .header-text h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .header-text p {
+            font-size: 0.9rem;
+            opacity: 0.75;
+            font-style: italic;
+            margin-top: 0.2rem;
+        }
 
-                <div class="form-group">
-                    <label>Observation Time Points (hours, comma-separated)</label>
-                    <input type="text" id="obs-times" value="24, 48, 72" placeholder="e.g., 6, 12, 24, 48" onchange="rebuildTables()">
-                </div>
+        /* ── WORKFLOW STEPS ── */
+        .workflow-banner {
+            background: var(--surface);
+            border-bottom: 2px solid var(--border);
+            padding: 1rem 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            overflow-x: auto;
+        }
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text3);
+            background: var(--bg);
+            border: 2px solid var(--border);
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        .workflow-step.active {
+            color: var(--primary);
+            background: rgba(138,184,64,0.15);
+            border-color: var(--accent);
+        }
+        .workflow-step.done {
+            color: var(--primary-light);
+            background: rgba(138,184,64,0.08);
+            border-color: var(--border2);
+        }
+        .workflow-arrow {
+            width: 2rem;
+            text-align: center;
+            color: var(--border2);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .step-num {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: currentColor;
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+        .workflow-step.active .step-num { background: var(--primary); }
+        .workflow-step .step-num { background: var(--text3); }
+        .workflow-step.done .step-num { background: var(--accent); }
+        /* fix text color inside step-num */
+        .step-num span { color: #fff; }
 
-                <div class="section-title">Treatments & Controls</div>
-                <div id="treatments-container"></div>
-                <div class="btn-row">
-                    <button class="btn btn-accent" onclick="addTreatment()">＋ Treatment</button>
-                    <button class="btn btn-control" onclick="addControl()">＋ Control</button>
-                </div>
+        /* ── LAYOUT ── */
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 2rem 2.5rem;
+        }
 
-                <div class="section-title" style="margin-top:2rem;">Observation Data — NEW Morbid &amp; Dead at Each Time Point</div>
-                <div class="info-box" style="margin-top:0; margin-bottom:0.5rem; font-size:0.78rem;">
-                    Enter <strong>NEW</strong> morbid (M) and dead (D) counts observed at each time point.
-                    The tool automatically accumulates cumulative M+D per replication and <strong>caps it at the insects-per-replication limit</strong>.
-                    If cumulative M+D would exceed the cap, it is set to the cap value automatically.
-                </div>
+        .main-grid {
+            display: grid;
+            grid-template-columns: 480px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
 
-                <div id="data-tables-container"></div>
+        /* ── PANELS ── */
+        .panel {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .panel-header {
+            background: var(--primary);
+            color: #fff;
+            padding: 1rem 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .panel-body { padding: 1.5rem; }
 
-                <button class="btn btn-primary btn-lg" onclick="runFullAnalysis()" id="analyze-btn">
-                    🔬 Analyze: Mortality + Probit
-                </button>
+        /* ── SECTION HEADINGS ── */
+        .section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary-light);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin: 1.5rem 0 1rem;
+        }
+        .section-title:first-child { margin-top: 0; }
 
-            </div>
-        </div>
+        /* ── FORM ── */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text2);
+            margin-bottom: 0.35rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(138,184,64,0.15);
+            background: #fff;
+        }
+
+        /* ── TREATMENT CARDS ── */
+        .treatment-card {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+        .treatment-card.is-control { border-color: var(--control); }
+        .treatment-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background: var(--surface2);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .is-control .treatment-card-header {
+            background: rgba(96,112,128,0.1);
+            color: var(--control);
+        }
+        .treatment-card-body {
+            padding: 0.75rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0.75rem;
+        }
+        .treatment-card-body .form-group { margin-bottom: 0; }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
+        .btn-accent { background: var(--accent); color: var(--primary); }
+        .btn-accent:hover { filter: brightness(1.05); transform: translateY(-1px); }
+        .btn-control { background: var(--control); color: #fff; }
+        .btn-control:hover { filter: brightness(1.1); }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { filter: brightness(1.1); }
+        .btn-warn { background: var(--warn); color: #fff; }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
+        .btn-lg {
+            width: 100%;
+            padding: 0.85rem;
+            font-size: 0.88rem;
+            justify-content: center;
+            margin-top: 1rem;
+            letter-spacing: 1px;
+        }
+        .btn-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+
+        /* ── INPUT TABLE ── */
+        .input-table-wrapper { overflow-x: auto; margin-top: 0.5rem; }
+        .input-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+        }
+        .input-table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.45rem 0.4rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-table td {
+            border: 1px solid var(--border);
+            padding: 0.2rem;
+            text-align: center;
+        }
+        .input-table td.time-cell {
+            background: var(--surface2);
+            font-weight: 700;
+            padding: 0.3rem 0.5rem;
+            color: var(--primary);
+        }
+        .input-table input {
+            width: 38px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            padding: 0.2rem;
+            color: var(--text);
+        }
+        .input-table input:focus {
+            background: rgba(138,184,64,0.15);
+            outline: none;
+        }
+        .input-table tr:nth-child(even) td { background: rgba(138,184,64,0.04); }
+        .input-table tr:hover td { background: rgba(138,184,64,0.08); }
+        .input-table tr:hover td.time-cell { background: var(--surface2); }
+
+        /* ── RESULTS ── */
+        .results-panel {
+            position: sticky;
+            top: 1rem;
+        }
+        #results-content { padding: 1.5rem; }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text3);
+        }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+        .empty-state p { font-style: italic; font-size: 0.9rem; }
+
+        /* Results output tables */
+        .result-section { margin-bottom: 2.5rem; }
+        .result-section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .result-table-wrap { overflow-x: auto; }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+        }
+        .result-table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.5rem 0.4rem;
+            text-align: center;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .result-table td {
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.5rem;
+            text-align: center;
+        }
+        .result-table tr:nth-child(even) td { background: var(--bg); }
+        .result-table tr:hover td { background: rgba(138,184,64,0.08); }
+        .result-table .highlight { color: var(--accent); font-weight: 700; }
+        .result-table .warn-cell { color: var(--warn); font-weight: 700; }
+        .result-table .danger-cell { color: var(--danger); font-weight: 700; }
+        .result-table .control-cell { color: var(--control); }
+
+        /* Probit section */
+        .probit-summary-table th:nth-child(n+4) { background: #1e4a10; }
+        .probit-lc15 { color: #5aa832; font-weight: 700; }
+        .probit-lc25 { color: #7ab032; font-weight: 700; }
+        .probit-lc50 { color: var(--warn); font-weight: 700; }
+        .probit-lc90 { color: var(--danger); font-weight: 700; }
+
+        /* Info/stat boxes */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        .stat-box {
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            text-align: center;
+        }
+        .stat-box .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text3);
+            margin-bottom: 0.25rem;
+        }
+        .stat-box .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .stat-box.accent .stat-value { color: var(--accent); }
+        .stat-box.warn .stat-value { color: var(--warn); }
+        .stat-box.danger .stat-value { color: var(--danger); }
+
+        .info-box {
+            background: rgba(138,184,64,0.1);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: var(--text2);
+            margin: 0.75rem 0;
+        }
+        .warn-box {
+            background: rgba(212,118,58,0.1);
+            border-left: 3px solid var(--warn);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: var(--text);
+            margin: 0.75rem 0;
+        }
+        .error-box {
+            background: rgba(193,69,58,0.1);
+            border-left: 3px solid var(--danger);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            color: var(--danger);
+            margin: 0.75rem 0;
+        }
+
+        .divider {
+            border: none;
+            border-top: 2px solid var(--border);
+            margin: 1.5rem 0;
+        }
+
+        /* Loading */
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2.5px solid rgba(255,255,255,0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Ranking bar */
+        .rank-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
+        .rank-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            min-width: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Probit data table */
+        .probit-data-section {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        .probit-data-header {
+            background: var(--surface2);
+            padding: 0.5rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1100px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .results-panel { position: static; }
+        }
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            header { padding: 1.2rem 1rem; flex-direction: column; text-align: center; }
+            .form-row { grid-template-columns: 1fr; }
+            .treatment-card-body { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-icon">🔬</div>
+    <div class="header-text">
+        <h1>Advanced Insect Toxicology Analyzer</h1>
+        <p>Raw bioassay data → Abbott's corrected mortality → Probit analysis (LC₁₅ · LC₂₅ · LC₅₀ · LC₉₀)</p>
     </div>
+</header>
 
-    <!-- RIGHT: Results Panel -->
-    <div class="results-panel">
-        <div class="panel" style="max-height:90vh; overflow-y:auto;">
-            <div class="panel-header">📊 Analysis Results</div>
-            <div id="results-content">
-                <div class="empty-state">
-                    <div class="empty-icon">🧪</div>
-                    <p>Add treatments, enter your raw observation data, and click <strong>Analyze</strong> to generate complete mortality tables and probit LC values.</p>
-                </div>
-            </div>
-        </div>
+<!-- Workflow Banner -->
+<div class="workflow-banner">
+    <div class="workflow-step active" id="step-badge-1">
+        <div class="step-num"><span>1</span></div> Enter Raw Observation Data
     </div>
-
+    <div class="workflow-arrow">→</div>
+    <div class="workflow-step" id="step-badge-2">
+        <div class="step-num"><span>2</span></div> Calculate Mortality + Abbott's Correction
+    </div>
+    <div class="workflow-arrow">→</div>
+    <div class="workflow-step" id="step-badge-3">
+        <div class="step-num"><span>3</span></div> Probit Analysis (LC Values)
+    </div>
 </div>
+
+<div class="container">
+    <div class="main-grid">
+
+        <!-- LEFT: Input Panel -->
+        <div>
+            <div class="panel">
+                <div class="panel-header">⚙️ Experiment Setup</div>
+                <div class="panel-body">
+
+                    <div class="section-title">General Parameters</div>
+
+                    <div class="form-group">
+                        <label>Experiment Title</label>
+                        <input type="text" id="exp-title" placeholder="e.g., Insecticide Efficacy Study – April 2025">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Insects per Replication</label>
+                            <select id="insects-per-rep" onchange="handleInsectsChange()">
+                                <option value="10">10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="25">25</option>
+                                <option value="30" selected>30</option>
+                                <option value="50">50</option>
+                                <option value="custom">Custom…</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="custom-group" style="display:none">
+                            <label>Custom Count</label>
+                            <input type="number" id="custom-count" min="1" placeholder="e.g., 40" onchange="rebuildTables()">
+                        </div>
+                        <div class="form-group">
+                            <label>Replications</label>
+                            <select id="num-reps" onchange="rebuildTables()">
+                                <option value="2">2</option>
+                                <option value="3" selected>3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observation Time Points (hours, comma-separated)</label>
+                        <input type="text" id="obs-times" value="24, 48, 72" placeholder="e.g., 6, 12, 24, 48" onchange="rebuildTables()">
+                    </div>
+
+                    <!-- ── TREATMENTS ── -->
+                    <div class="section-title">Treatments & Controls</div>
+
+                    <div id="treatments-container"></div>
+
+                    <div class="btn-row">
+                        <button class="btn btn-accent" onclick="addTreatment()">＋ Treatment</button>
+                        <button class="btn btn-control" onclick="addControl()">＋ Control</button>
+                    </div>
+
+                    <!-- ── DATA INPUT TABLES ── -->
+                    <div class="section-title" style="margin-top:2rem;">Observation Data (Morbid &amp; Dead per Replication)</div>
+                    <div class="info-box" style="margin-top:0; margin-bottom:0.5rem; font-size:0.78rem;">
+                        Enter <strong>new</strong> morbid + dead counts at each time point (not cumulative — the tool accumulates automatically).
+                    </div>
+
+                    <div id="data-tables-container"></div>
+
+                    <button class="btn btn-primary btn-lg" onclick="runFullAnalysis()" id="analyze-btn">
+                        🔬 Analyze: Mortality + Probit
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Results Panel -->
+        <div class="results-panel">
+            <div class="panel" style="max-height:90vh; overflow-y:auto;">
+                <div class="panel-header">📊 Analysis Results</div>
+                <div id="results-content">
+                    <div class="empty-state">
+                        <div class="empty-icon">🧪</div>
+                        <p>Add treatments, enter your raw observation data, and click <strong>Analyze</strong> to generate complete mortality tables and probit LC values.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /main-grid -->
+</div><!-- /container -->
+
+<script>
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let treatmentCounter = 0;
+
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+function getInsectsPerRep() {
+    const sel = document.getElementById('insects-per-rep');
+    if (sel.value === 'custom') return parseInt(document.getElementById('custom-count').value) || 10;
+    return parseInt(sel.value);
+}
+function getNumReps() { return parseInt(document.getElementById('num-reps').value); }
+function getObsTimes() {
+    return document.getElementById('obs-times').value
+        .split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
+}
+function getAllTreatments() {
+    const items = [];
+    document.querySelectorAll('.treatment-card').forEach(el => {
+        const id = el.dataset.id;
+        const name = document.getElementById(`tname-${id}`)?.value?.trim();
+        const conc = parseFloat(document.getElementById(`tconc-${id}`)?.value) || 0;
+        const isCtrl = el.classList.contains('is-control');
+        if (name) items.push({ id, name, conc, isControl: isCtrl });
+    });
+    return items;
+}
+
+// ─────────────────────────────────────────────
+//  TREATMENTS
+// ─────────────────────────────────────────────
+function handleInsectsChange() {
+    const sel = document.getElementById('insects-per-rep');
+    document.getElementById('custom-group').style.display = sel.value === 'custom' ? 'block' : 'none';
+}
+
+function addTreatment(name='', conc='') {
+    treatmentCounter++;
+    const id = treatmentCounter;
+    const el = document.createElement('div');
+    el.className = 'treatment-card';
+    el.dataset.id = id;
+    el.id = `tcard-${id}`;
+    el.innerHTML = `
+        <div class="treatment-card-header">
+            <span>Treatment ${id}</span>
+            <button class="btn btn-danger btn-sm" onclick="removeCard(${id})">✕ Remove</button>
+        </div>
+        <div class="treatment-card-body">
+            <div class="form-group">
+                <label>Insecticide Name</label>
+                <input type="text" id="tname-${id}" value="${name}" placeholder="e.g., Chlorpyriphos" oninput="rebuildTables()">
+            </div>
+            <div class="form-group">
+                <label>Concentration (%)</label>
+                <input type="number" id="tconc-${id}" value="${conc}" step="0.001" placeholder="0.02" oninput="rebuildTables()">
+            </div>
+        </div>`;
+    document.getElementById('treatments-container').appendChild(el);
+    rebuildTables();
+}
+
+function addControl(name='Control', conc=0) {
+    treatmentCounter++;
+    const id = treatmentCounter;
+    const el = document.createElement('div');
+    el.className = 'treatment-card is-control';
+    el.dataset.id = id;
+    el.id = `tcard-${id}`;
+    el.innerHTML = `
+        <div class="treatment-card-header">
+            <span>🛡 Control Group</span>
+            <button class="btn btn-danger btn-sm" onclick="removeCard(${id})">✕ Remove</button>
+        </div>
+        <div class="treatment-card-body">
+            <div class="form-group">
+                <label>Control Label</label>
+                <input type="text" id="tname-${id}" value="${name}" oninput="rebuildTables()">
+            </div>
+            <div class="form-group">
+                <label>Concentration (%)</label>
+                <input type="number" id="tconc-${id}" value="${conc}" readonly style="opacity:0.6">
+            </div>
+        </div>`;
+    document.getElementById('treatments-container').appendChild(el);
+    rebuildTables();
+}
+
+function removeCard(id) {
+    document.getElementById(`tcard-${id}`)?.remove();
+    rebuildTables();
+}
+
+// ─────────────────────────────────────────────
+//  DATA INPUT TABLES
+// ─────────────────────────────────────────────
+function rebuildTables() {
+    const saved = captureInputValues();
+    const container = document.getElementById('data-tables-container');
+    container.innerHTML = '';
+    const treatments = getAllTreatments();
+    const numReps = getNumReps();
+    const times = getObsTimes();
+    if (!treatments.length || !times.length) return;
+
+    treatments.forEach(t => {
+        const wrapper = document.createElement('div');
+        wrapper.style.marginBottom = '1.5rem';
+        let thead = '<tr>';
+        thead += '<th>Time (h)</th>';
+        for (let r = 1; r <= numReps; r++) {
+            thead += `<th colspan="2">Rep ${r}</th>`;
+        }
+        thead += '</tr><tr><th></th>';
+        for (let r = 1; r <= numReps; r++) {
+            thead += '<th>Morbid</th><th>Dead</th>';
+        }
+        thead += '</tr>';
+
+        let tbody = '';
+        times.forEach(time => {
+            tbody += `<tr><td class="time-cell">${time}h</td>`;
+            for (let r = 1; r <= numReps; r++) {
+                tbody += `<td><input type="number" id="d-${t.id}-${time}-${r}-m" min="0" value="0" onchange="flagDirty()"></td>`;
+                tbody += `<td><input type="number" id="d-${t.id}-${time}-${r}-d" min="0" value="0" onchange="flagDirty()"></td>`;
+            }
+            tbody += '</tr>';
+        });
+
+        wrapper.innerHTML = `
+            <div style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700;
+                        color:${t.isControl ? 'var(--control)' : 'var(--primary)'};
+                        margin-bottom:0.35rem; text-transform:uppercase; letter-spacing:0.5px;">
+                ${t.name || '(unnamed)'} ${t.isControl ? '' : `— ${t.conc}%`}
+                ${t.isControl ? '<span style="font-size:0.65rem; background:var(--control);color:#fff;border-radius:3px;padding:1px 5px;margin-left:6px;">CONTROL</span>' : ''}
+            </div>
+            <div class="input-table-wrapper">
+                <table class="input-table">
+                    <thead>${thead}</thead>
+                    <tbody>${tbody}</tbody>
+                </table>
+            </div>`;
+        container.appendChild(wrapper);
+    });
+
+    // restore saved
+    setTimeout(() => {
+        Object.entries(saved).forEach(([id, val]) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        });
+    }, 50);
+}
+
+function captureInputValues() {
+    const vals = {};
+    document.querySelectorAll('[id^="d-"]').forEach(el => {
+        if (el.value && el.value !== '0') vals[el.id] = el.value;
+    });
+    return vals;
+}
+
+function flagDirty() {
+    const rc = document.getElementById('results-content');
+    if (rc && !rc.innerHTML.includes('empty-state') && !rc.querySelector('.dirty-notice')) {
+        const n = document.createElement('div');
+        n.className = 'warn-box dirty-notice';
+        n.innerHTML = '⚠️ Data changed — click <strong>Analyze</strong> to refresh results.';
+        rc.prepend(n);
+    }
+}
+
+// ─────────────────────────────────────────────
+//  MAIN ANALYSIS
+// ─────────────────────────────────────────────
+function runFullAnalysis() {
+    const btn = document.getElementById('analyze-btn');
+    btn.innerHTML = '<span class="spinner"></span> Analyzing…';
+    btn.disabled = true;
+
+    setTimeout(() => {
+        try {
+            _doAnalysis();
+        } catch(e) {
+            document.getElementById('results-content').innerHTML =
+                `<div class="error-box" style="margin:1.5rem;"><strong>Error:</strong> ${e.message}</div>`;
+        } finally {
+            btn.innerHTML = '🔬 Analyze: Mortality + Probit';
+            btn.disabled = false;
+        }
+    }, 60);
+}
+
+function _doAnalysis() {
+    const treatments = getAllTreatments();
+    if (!treatments.length) throw new Error('Add at least one treatment.');
+    const times = getObsTimes();
+    if (!times.length) throw new Error('Enter observation time points.');
+    const numReps = getNumReps();
+    const n = getInsectsPerRep();
+    const title = document.getElementById('exp-title').value || 'Toxicology Experiment';
+
+    // ── Step 1: collect raw data & compute cumulative mortality ──
+    const treatmentData = treatments.map(t => {
+        const timeData = [];
+        // cumulative per replication
+        const cumRep = new Array(numReps).fill(0);
+
+        times.forEach(time => {
+            const reps = [];
+            for (let r = 1; r <= numReps; r++) {
+                const m = parseInt(document.getElementById(`d-${t.id}-${time}-${r}-m`)?.value) || 0;
+                const d = parseInt(document.getElementById(`d-${t.id}-${time}-${r}-d`)?.value) || 0;
+                reps.push({ m, d, newAffected: m + d });
+            }
+            // accumulate
+            reps.forEach((rep, i) => {
+                cumRep[i] = Math.min(cumRep[i] + rep.newAffected, n);
+            });
+            const avgCum = cumRep.reduce((a,b)=>a+b,0) / numReps;
+            const pct = (avgCum / n) * 100;
+            timeData.push({
+                time,
+                repsRaw: reps,
+                cumPerRep: [...cumRep],
+                mortalityPct: pct,
+                abbottPct: pct  // placeholder; recalculated below
+            });
+        });
+
+        return { ...t, timeData };
+    });
+
+    // ── Step 2: Abbott's correction ──
+    const ctrlData = treatmentData.find(t => t.isControl);
+
+    treatmentData.forEach(t => {
+        if (t.isControl) return;
+        t.timeData.forEach(td => {
+            const ctrl = ctrlData?.timeData.find(c => c.time === td.time);
+            const ctrlPct = ctrl?.mortalityPct ?? 0;
+            if (ctrlPct >= 100) {
+                td.abbottPct = td.mortalityPct;
+            } else {
+                td.abbottPct = Math.max(0,
+                    ((td.mortalityPct - ctrlPct) / (100 - ctrlPct)) * 100
+                );
+            }
+        });
+    });
+
+    // ── Step 3: Probit analysis using FINAL time point's Abbott's % for each treatment+conc ──
+    // Group non-control treatments by insecticide name; each concentration is one data point
+    const probitGroups = {};
+    treatmentData.filter(t => !t.isControl).forEach(t => {
+        if (!probitGroups[t.name]) probitGroups[t.name] = [];
+        const finalTd = t.timeData[t.timeData.length - 1];
+        probitGroups[t.name].push({
+            conc: t.conc,
+            mortalityPct: finalTd.abbottPct,
+            insectsTested: n * numReps
+        });
+    });
+
+    // run probit per insecticide
+    const probitResults = {};
+    Object.keys(probitGroups).forEach(insecticide => {
+        const pts = probitGroups[insecticide].sort((a,b)=>a.conc-b.conc);
+        if (pts.length >= 2) {
+            probitResults[insecticide] = calcProbit(pts);
+        } else {
+            probitResults[insecticide] = { insufficient: true, pts };
+        }
+    });
+
+    // ── Render ──
+    renderResults(title, treatmentData, probitResults, n, numReps);
+    setBadgeDone();
+}
+
+// ─────────────────────────────────────────────
+//  PROBIT MATH
+// ─────────────────────────────────────────────
+function normalInv(p) {
+    p = Math.max(1e-9, Math.min(1-1e-9, p));
+    const a = [2.515517,0.802853,0.010328];
+    const b = [1.432788,0.189269,0.001308];
+    function rational(t) {
+        return (a[0]+t*(a[1]+t*a[2]))/(1+t*(b[0]+t*(b[1]+t*b[2])));
+    }
+    if (p < 0.5) {
+        const t = Math.sqrt(-2*Math.log(p));
+        return -(t - rational(t));
+    } else {
+        const t = Math.sqrt(-2*Math.log(1-p));
+        return t - rational(t);
+    }
+}
+
+function calcProbit(pts) {
+    // constrain mortality to valid range for probit
+    const data = pts.map(p => {
+        const m = Math.max(0.5, Math.min(99.5, p.mortalityPct));
+        const probit = normalInv(m/100) + 5;
+        const logC = Math.log10(Math.max(p.conc, 1e-10));
+        return { ...p, probit, logC, m };
+    });
+
+    // weighted least squares (weights = n * p*(1-p))
+    const n = data.length;
+    let swX=0, swY=0, swXX=0, swXY=0, sw=0;
+    data.forEach(d => {
+        const phat = d.m/100;
+        const w = Math.max(0.01, phat*(1-phat));
+        sw   += w;
+        swX  += w*d.logC;
+        swY  += w*d.probit;
+        swXX += w*d.logC*d.logC;
+        swXY += w*d.logC*d.probit;
+    });
+    const denom = sw*swXX - swX*swX;
+    const slope = denom !== 0 ? (sw*swXY - swX*swY)/denom : 1;
+    const intercept = (swY - slope*swX)/sw;
+
+    // R²
+    const meanY = swY/sw;
+    let ssTot=0, ssRes=0;
+    data.forEach(d => {
+        const pred = intercept + slope*d.logC;
+        const w = Math.max(0.01, (d.m/100)*(1-d.m/100));
+        ssTot += w*Math.pow(d.probit-meanY,2);
+        ssRes += w*Math.pow(d.probit-pred,2);
+    });
+    const r2 = ssTot > 0 ? Math.max(0, 1-ssRes/ssTot) : 0;
+
+    // SE of slope
+    const mse = n > 2 ? ssRes/(n-2) : ssRes;
+    const sxx = swXX - swX*swX/sw;
+    const slopeStdErr = sxx > 0 ? Math.sqrt(mse/sxx) : 0;
+
+    // LC values
+    const targets = { LC15:3.963, LC25:4.326, LC30:4.476, LC50:5.000, LC75:5.674, LC90:6.282 };
+    const lcValues = {};
+    Object.entries(targets).forEach(([lc, pv]) => {
+        const logC = (pv - intercept) / slope;
+        lcValues[lc] = Math.pow(10, logC);
+    });
+
+    // 95% Fiducial limits for LC50 (simplified)
+    const lc50LogC = (5.0 - intercept)/slope;
+    const g = 1.96*1.96 / (slope*slope * sxx / mse);
+    const flHalfWidth = g < 1 ? Math.abs(1.96 * Math.sqrt(mse) * Math.sqrt(1/sw + Math.pow(lc50LogC - swX/sw, 2)/sxx)) / Math.abs(slope) : 0.2;
+    const fl = {
+        lower: Math.pow(10, lc50LogC - flHalfWidth),
+        upper: Math.pow(10, lc50LogC + flHalfWidth)
+    };
+
+    // Heterogeneity chi-square
+    let chi2 = 0;
+    data.forEach(d => {
+        const expected = intercept + slope*d.logC;
+        chi2 += Math.pow(d.probit - expected, 2);
+    });
+    const df = Math.max(1, n-2);
+    const critChi = df === 1 ? 3.84 : df === 2 ? 5.99 : df === 3 ? 7.81 : 9.49;
+    const sig = chi2 > critChi;
+
+    return {
+        data, slope, intercept, r2, slopeStdErr,
+        lcValues, fl, chi2, df, sig,
+        equation: `y = ${intercept.toFixed(3)} + ${slope.toFixed(3)}x`,
+        minConc: Math.min(...pts.map(p=>p.conc)),
+        maxConc: Math.max(...pts.map(p=>p.conc))
+    };
+}
+
+// ─────────────────────────────────────────────
+//  RENDER RESULTS
+// ─────────────────────────────────────────────
+function renderResults(title, treatmentData, probitResults, n, numReps) {
+    const rc = document.getElementById('results-content');
+    let html = '';
+
+    // ── Title ──
+    html += `
+        <div style="padding:1.5rem 1.5rem 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div style="font-family:'JetBrains Mono',monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:1px; color:var(--text3); margin-bottom:0.2rem;">Results</div>
+                    <div style="font-family:'Libre Baskerville',serif; font-size:1.15rem; font-weight:700; color:var(--primary);">${title}</div>
+                    <div style="font-size:0.78rem; color:var(--text3); margin-top:0.15rem;">${n} insects/rep · ${numReps} reps · ${treatmentData.length} treatments</div>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="runFullAnalysis()">🔄 Re-run</button>
+            </div>
+            <hr class="divider" style="margin-top:1rem;">
+        </div>`;
+
+    html += `<div style="padding:0 1.5rem;">`;
+
+    // ─── SECTION A: Mortality Tables ───
+    html += `<div class="result-section">
+        <div class="result-section-title">📋 Step 1 + 2 — Raw Mortality &amp; Abbott's Correction</div>
+        <div class="info-box" style="margin-top:0; font-size:0.78rem;">
+            Cumulative morbid+dead is accumulated across time points. Abbott's formula corrects for natural mortality in control:
+            <strong>C% = [(T% − Ctrl%) / (100 − Ctrl%)] × 100</strong>
+        </div>`;
+
+    treatmentData.forEach(t => {
+        const isCtrl = t.isControl;
+        html += `
+            <div style="margin-bottom:1.5rem;">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700;
+                            color:${isCtrl ? 'var(--control)' : 'var(--primary)'}; margin-bottom:0.4rem;">
+                    ${t.name} ${isCtrl ? '— CONTROL' : `(${t.conc}%)`}
+                </div>
+                <div class="result-table-wrap">
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Time (h)</th>`;
+        for (let r=1; r<=numReps; r++) html += `<th colspan="3">Rep ${r}</th>`;
+        html += `<th rowspan="2">Cum. Affected<br>[R1, R2…]</th>
+                            <th rowspan="2">Mortality %</th>`;
+        if (!isCtrl) html += `<th rowspan="2" style="background:#1e4a10;">Abbott's %</th>`;
+        html += `</tr><tr>`;
+        for (let r=1; r<=numReps; r++) html += `<th>M</th><th>D</th><th>M+D</th>`;
+        html += `</tr></thead><tbody>`;
+
+        t.timeData.forEach(td => {
+            html += `<tr><td class="time-cell" style="background:var(--surface2);font-weight:700;">${td.time}h</td>`;
+            for (let r=0; r<numReps; r++) {
+                const rep = td.repsRaw[r] || {m:0,d:0};
+                html += `<td>${rep.m}</td><td>${rep.d}</td><td><b>${rep.m+rep.d}</b></td>`;
+            }
+            html += `<td><b>[${td.cumPerRep.join(', ')}]</b></td>`;
+            html += `<td><b>${td.mortalityPct.toFixed(1)}%</b></td>`;
+            if (!isCtrl) {
+                const cls = td.abbottPct >= 80 ? 'danger-cell' : td.abbottPct >= 50 ? 'warn-cell' : 'highlight';
+                html += `<td class="${cls}"><b>${td.abbottPct.toFixed(1)}%</b></td>`;
+            }
+            html += `</tr>`;
+        });
+        html += `</tbody></table></div>`;
+
+        // mini stats
+        const finalTd = t.timeData[t.timeData.length-1];
+        if (!isCtrl) {
+            const lt50 = t.timeData.find(td => td.abbottPct >= 50);
+            html += `<div class="stat-grid" style="margin-top:0.75rem;">
+                <div class="stat-box ${finalTd.abbottPct>=80?'danger':finalTd.abbottPct>=50?'warn':'accent'}">
+                    <div class="stat-label">Final Abbott's %</div>
+                    <div class="stat-value">${finalTd.abbottPct.toFixed(1)}%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Final Mortality %</div>
+                    <div class="stat-value">${finalTd.mortalityPct.toFixed(1)}%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">LT₅₀ Estimate</div>
+                    <div class="stat-value">${lt50 ? lt50.time+'h' : '>'+t.timeData[t.timeData.length-1].time+'h'}</div>
+                </div>
+            </div>`;
+        }
+        html += `</div>`;
+    });
+    html += `</div>`; // close section A
+
+    // ─── SECTION B: Comparative Ranking ───
+    const nonCtrl = treatmentData.filter(t=>!t.isControl);
+    if (nonCtrl.length > 1) {
+        const ranked = [...nonCtrl].sort((a,b) =>
+            b.timeData[b.timeData.length-1].abbottPct - a.timeData[a.timeData.length-1].abbottPct
+        );
+        const maxPct = ranked[0].timeData[ranked[0].timeData.length-1].abbottPct;
+        html += `<div class="result-section">
+            <div class="result-section-title">🏆 Comparative Efficacy Ranking (Final Abbott's %)</div>
+            <div style="display:grid; gap:0.6rem;">`;
+        ranked.forEach((t, i) => {
+            const pct = t.timeData[t.timeData.length-1].abbottPct;
+            const barW = maxPct > 0 ? (pct/maxPct*100) : 0;
+            html += `<div style="display:flex; align-items:center; gap:0.75rem; font-family:'JetBrains Mono',monospace; font-size:0.78rem;">
+                <div style="width:1.2rem; text-align:right; color:var(--text3);">${i+1}.</div>
+                <div style="width:120px; color:var(--primary); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.name} (${t.conc}%)</div>
+                <div class="rank-bar-wrap" style="flex:1;">
+                    <div class="rank-bar" style="width:${barW}%;"></div>
+                </div>
+                <div style="width:50px; text-align:right; font-weight:700; color:${pct>=80?'var(--danger)':pct>=50?'var(--warn)':'var(--accent)'};">${pct.toFixed(1)}%</div>
+            </div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    // ─── SECTION C: Probit Analysis ───
+    html += `<div class="result-section">
+        <div class="result-section-title">📈 Step 3 — Probit Analysis (LC Values)</div>
+        <div class="info-box" style="margin-top:0; font-size:0.78rem;">
+            Probit regression uses <strong>final Abbott's corrected mortality %</strong> for each treatment concentration.
+            LC values = lethal concentration killing X% of test population.
+            Requires ≥ 2 concentration points per insecticide.
+        </div>`;
+
+    const probitKeys = Object.keys(probitResults);
+    if (!probitKeys.length) {
+        html += `<div class="warn-box">No non-control treatments with concentration data found for probit analysis.</div>`;
+    } else {
+        // Summary table
+        html += `<div class="result-table-wrap">
+            <table class="result-table probit-summary-table">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Insecticide</th>
+                        <th>Conc Range (%)</th>
+                        <th>LC₁₅</th>
+                        <th>LC₂₅</th>
+                        <th>LC₃₀</th>
+                        <th>LC₅₀</th>
+                        <th>LC₉₀</th>
+                        <th>95% FL (LC₅₀)</th>
+                        <th>χ² (df)</th>
+                        <th>R²</th>
+                        <th>Slope ± SE</th>
+                        <th>Regression Equation</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+        probitKeys.forEach((insecticide, idx) => {
+            const res = probitResults[insecticide];
+            if (res.insufficient) {
+                html += `<tr>
+                    <td>${idx+1}</td>
+                    <td>${insecticide}</td>
+                    <td colspan="11" style="color:var(--warn); font-style:italic;">
+                        Insufficient data — need ≥ 2 concentration points (found ${res.pts.length})
+                    </td>
+                </tr>`;
+                return;
+            }
+            const lc = res.lcValues;
+            html += `<tr>
+                <td>${idx+1}</td>
+                <td style="font-weight:700;">${insecticide}</td>
+                <td>${res.minConc.toFixed(4)} – ${res.maxConc.toFixed(4)}</td>
+                <td class="probit-lc15">${lc.LC15.toFixed(4)}</td>
+                <td class="probit-lc25">${lc.LC25.toFixed(4)}</td>
+                <td class="probit-lc25">${lc.LC30.toFixed(4)}</td>
+                <td class="probit-lc50">${lc.LC50.toFixed(4)}</td>
+                <td class="probit-lc90">${lc.LC90.toFixed(4)}</td>
+                <td style="font-size:0.65rem;">${res.fl.lower.toFixed(4)} – ${res.fl.upper.toFixed(4)}</td>
+                <td>${res.chi2.toFixed(2)} (${res.df}) <span style="color:${res.sig?'var(--danger)':'var(--accent)'};">${res.sig?'S':'NS'}</span></td>
+                <td style="font-weight:700;">${res.r2.toFixed(3)}</td>
+                <td>${res.slope.toFixed(3)} ± ${res.slopeStdErr.toFixed(3)}</td>
+                <td style="font-size:0.65rem; font-family:'JetBrains Mono',monospace;">${res.equation}</td>
+            </tr>`;
+        });
+
+        html += `</tbody></table></div>`;
+
+        // Per-insecticide detail with probit data points
+        html += `<div style="margin-top:1.5rem;">`;
+        probitKeys.forEach(insecticide => {
+            const res = probitResults[insecticide];
+            if (res.insufficient) return;
+            html += `
+                <div class="probit-data-section" style="margin-bottom:1rem;">
+                    <div class="probit-data-header">
+                        ${insecticide} — Probit data points (used for regression)
+                    </div>
+                    <div class="result-table-wrap">
+                    <table class="result-table">
+                        <thead><tr>
+                            <th>Concentration (%)</th>
+                            <th>Log₁₀(Conc)</th>
+                            <th>Abbott's Mortality %</th>
+                            <th>Constrained %</th>
+                            <th>Probit Value</th>
+                            <th>Expected Probit</th>
+                            <th>Residual</th>
+                        </tr></thead>
+                        <tbody>`;
+            res.data.forEach(d => {
+                const expected = res.intercept + res.slope * d.logC;
+                const resid = d.probit - expected;
+                html += `<tr>
+                    <td>${d.conc}</td>
+                    <td>${d.logC.toFixed(4)}</td>
+                    <td>${d.mortalityPct.toFixed(2)}%</td>
+                    <td>${d.m.toFixed(2)}%</td>
+                    <td class="highlight">${d.probit.toFixed(4)}</td>
+                    <td>${expected.toFixed(4)}</td>
+                    <td style="color:${Math.abs(resid)>0.5?'var(--warn)':'var(--text3)'};">${resid.toFixed(4)}</td>
+                </tr>`;
+            });
+            html += `</tbody></table></div></div>`;
+        });
+        html += `</div>`;
+
+        // Interpretation guide
+        html += `<div class="info-box" style="margin-top:1rem;">
+            <strong>Statistical interpretation:</strong>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">
+                R² > 0.80 = good fit · χ² NS = data fits probit model well · Narrow FL = precise LC₅₀ estimate · S = significant heterogeneity
+            </span>
+        </div>`;
+    }
+
+    html += `</div>`; // close section C
+
+    html += `</div>`; // close padding wrapper
+
+    rc.innerHTML = html;
+    rc.classList.add('fade-in');
+    rc.scrollTop = 0;
+}
+
+function setBadgeDone() {
+    ['step-badge-1','step-badge-2','step-badge-3'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('active');
+        el.classList.add('done');
+    });
+}
+
+// ─────────────────────────────────────────────
+//  INIT — sample data
+// ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+    // Three concentrations of two insecticides + control
+    setTimeout(() => {
+        addTreatment('Chlorpyriphos', '0.01');
+        addTreatment('Chlorpyriphos', '0.02');
+        addTreatment('Chlorpyriphos', '0.05');
+        addTreatment('Cypermethrin', '0.005');
+        addTreatment('Cypermethrin', '0.01');
+        addTreatment('Cypermethrin', '0.02');
+        addControl('Control (Distilled Water)', '0');
+        document.getElementById('obs-times').value = '24, 48, 72';
+        document.getElementById('insects-per-rep').value = '30';
+        document.getElementById('num-reps').value = '3';
+        rebuildTables();
+
+        // fill sample data
+        setTimeout(() => {
+            const sampleData = {
+                // Chlorpyriphos 0.01%
+                '1': { '24': [[1,0],[1,0],[1,0]], '48': [[1,1],[2,0],[1,1]], '72': [[0,2],[1,2],[0,3]] },
+                // Chlorpyriphos 0.02%
+                '2': { '24': [[3,0],[2,0],[3,0]], '48': [[2,2],[2,1],[2,2]], '72': [[1,4],[0,5],[1,4]] },
+                // Chlorpyriphos 0.05%
+                '3': { '24': [[5,1],[4,1],[5,0]], '48': [[2,4],[2,4],[3,3]], '72': [[1,6],[0,6],[0,7]] },
+                // Cypermethrin 0.005%
+                '4': { '24': [[1,0],[0,0],[1,0]], '48': [[1,0],[1,0],[1,1]], '72': [[0,1],[0,2],[0,1]] },
+                // Cypermethrin 0.01%
+                '5': { '24': [[2,0],[2,0],[2,0]], '48': [[1,2],[1,1],[2,1]], '72': [[0,3],[1,3],[0,3]] },
+                // Cypermethrin 0.02%
+                '6': { '24': [[4,1],[3,1],[4,0]], '48': [[2,3],[2,3],[1,4]], '72': [[0,5],[1,5],[0,6]] },
+                // Control
+                '7': { '24': [[0,0],[0,0],[0,0]], '48': [[0,0],[0,0],[0,0]], '72': [[0,1],[0,0],[0,0]] }
+            };
+            Object.entries(sampleData).forEach(([tid, times]) => {
+                Object.entries(times).forEach(([time, reps]) => {
+                    reps.forEach((rep, r) => {
+                        const mi = document.getElementById(`d-${tid}-${time}-${r+1}-m`);
+                        const di = document.getElementById(`d-${tid}-${time}-${r+1}-d`);
+                        if (mi) mi.value = rep[0];
+                        if (di) di.value = rep[1];
+                    });
+                });
+            });
+        }, 200);
+    }, 100);
+});
+</script>
+</body>
+</html>
