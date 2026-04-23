@@ -2,276 +2,356 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Advanced Insect Toxicology Analyzer (Fixed)</title>
+<title>Insect Toxicology Analyzer</title>
+
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&family=Libre+Baskerville&display=swap" rel="stylesheet">
+
 <style>
-body { font-family: Arial; padding:20px; background:#f5f7f0; }
-input { width:60px; }
-button { padding:6px 12px; margin:5px; }
-table { border-collapse: collapse; margin-top:10px; }
-td,th { border:1px solid #999; padding:4px; text-align:center; }
+:root{
+--bg:#f5f7f0;
+--card:#ffffff;
+--primary:#2d5a1b;
+--accent:#8ab840;
+--text:#1e2e18;
+--muted:#6c7a65;
+--warn:#d4763a;
+--border:#d5e0c5;
+}
+
+body{
+margin:0;
+padding:2rem;
+background:var(--bg);
+font-family:'Libre Baskerville',serif;
+color:var(--text);
+}
+
+h1{
+font-size:1.5rem;
+margin-bottom:1rem;
+color:var(--primary);
+}
+
+.panel{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:10px;
+padding:1rem;
+margin-bottom:1.5rem;
+}
+
+input,select{
+font-family:'JetBrains Mono';
+padding:0.4rem;
+border:1px solid var(--border);
+border-radius:6px;
+}
+
+button{
+background:var(--primary);
+color:white;
+border:none;
+padding:0.6rem 1rem;
+border-radius:6px;
+cursor:pointer;
+font-family:'JetBrains Mono';
+}
+
+button:hover{
+background:#3c7a25;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:1rem;
+font-family:'JetBrains Mono';
+font-size:0.75rem;
+}
+
+td,th{
+border:1px solid var(--border);
+padding:4px;
+text-align:center;
+}
+
+th{
+background:var(--primary);
+color:white;
+}
+
+.result{
+background:white;
+border:1px solid var(--border);
+border-radius:10px;
+padding:1rem;
+margin-top:1rem;
+}
+
+.warn{
+background:#fff4e5;
+border-left:4px solid var(--warn);
+padding:0.5rem;
+margin-bottom:1rem;
+font-size:0.8rem;
+}
+
+.stat{
+background:#f7f9f3;
+border:1px solid var(--border);
+padding:0.6rem;
+border-radius:6px;
+margin-top:0.5rem;
+}
 </style>
 </head>
 
 <body>
 
-<h2>🔬 Insect Toxicology Analyzer (Fixed)</h2>
+<h1>🔬 Insect Toxicology Analyzer</h1>
 
-<div>
+<div class="panel">
 Insects/rep:
 <select id="n"><option>10</option><option selected>30</option></select>
 
 Replications:
 <select id="rep"><option>2</option><option selected>3</option></select>
 
-Times:
+Time (h):
 <input id="times" value="24,48,72">
 </div>
 
-<hr>
-
+<div class="panel">
 <button onclick="addTreatment()">+ Treatment</button>
 <button onclick="addControl()">+ Control</button>
-
 <div id="treatments"></div>
+</div>
 
-<hr>
-
-<div id="tables"></div>
+<div class="panel" id="tables"></div>
 
 <button onclick="analyze()">🔬 Analyze</button>
-
-<hr>
 
 <div id="result"></div>
 
 <script>
 
-// ---------- STATE ----------
-let tid = 0;
+let tid=0;
 
-// ---------- HELPERS ----------
-function getTimes() {
-    return document.getElementById("times").value.split(",").map(x=>+x.trim());
+function getTimes(){
+return document.getElementById("times").value.split(",").map(x=>+x.trim());
 }
-function getN() { return +document.getElementById("n").value; }
-function getRep() { return +document.getElementById("rep").value; }
+function getN(){return +document.getElementById("n").value;}
+function getRep(){return +document.getElementById("rep").value;}
 
-function getTreatments() {
-    const arr = [];
-    document.querySelectorAll(".t").forEach(el=>{
-        const id = el.dataset.id;
-        const name = document.getElementById("name-"+id).value;
-        const conc = +document.getElementById("conc-"+id).value || 0;
-        const isControl = el.classList.contains("ctrl");
-        if(name) arr.push({id,name,conc,isControl});
-    });
-    return arr;
+function getTreatments(){
+let arr=[];
+document.querySelectorAll(".t").forEach(el=>{
+let id=el.dataset.id;
+let name=document.getElementById("name-"+id).value;
+let conc=+document.getElementById("conc-"+id).value||0;
+let ctrl=el.classList.contains("ctrl");
+if(name) arr.push({id,name,conc,ctrl});
+});
+return arr;
 }
 
-// ---------- UI ----------
-function addTreatment() {
-    tid++;
-    const div = document.createElement("div");
-    div.className="t";
-    div.dataset.id=tid;
-    div.innerHTML = `
-    Name:<input id="name-${tid}">
-    Conc:<input id="conc-${tid}">
-    `;
-    document.getElementById("treatments").appendChild(div);
-    buildTables();
+function addTreatment(){
+tid++;
+let d=document.createElement("div");
+d.className="t";
+d.dataset.id=tid;
+d.innerHTML=`Name:<input id="name-${tid}"> Conc:<input id="conc-${tid}">`;
+document.getElementById("treatments").appendChild(d);
+build();
 }
 
-function addControl() {
-    tid++;
-    const div = document.createElement("div");
-    div.className="t ctrl";
-    div.dataset.id=tid;
-    div.innerHTML = `
-    Control:<input id="name-${tid}" value="Control">
-    `;
-    document.getElementById("treatments").appendChild(div);
-    buildTables();
+function addControl(){
+tid++;
+let d=document.createElement("div");
+d.className="t ctrl";
+d.dataset.id=tid;
+d.innerHTML=`Control:<input id="name-${tid}" value="Control">`;
+document.getElementById("treatments").appendChild(d);
+build();
 }
 
-// ---------- TABLE ----------
-function buildTables() {
-    const t = getTreatments();
-    const times = getTimes();
-    const rep = getRep();
+function build(){
+let t=getTreatments();
+let times=getTimes();
+let rep=getRep();
 
-    let html="";
+let html="";
 
-    t.forEach(tr=>{
-        html += `<h4>${tr.name}</h4><table><tr><th>Time</th>`;
-        for(let r=1;r<=rep;r++) html+=`<th>M${r}</th><th>D${r}</th>`;
-        html+="</tr>";
+t.forEach(tr=>{
+html+=`<h4>${tr.name}</h4><table><tr><th>Time</th>`;
+for(let r=1;r<=rep;r++) html+=`<th>M${r}</th><th>D${r}</th>`;
+html+="</tr>";
 
-        times.forEach(time=>{
-            html+=`<tr><td>${time}</td>`;
-            for(let r=1;r<=rep;r++){
-                html+=`<td><input id="m-${tr.id}-${time}-${r}" value="0"></td>`;
-                html+=`<td><input id="d-${tr.id}-${time}-${r}" value="0"></td>`;
-            }
-            html+="</tr>";
-        });
+times.forEach(time=>{
+html+=`<tr><td>${time}</td>`;
+for(let r=1;r<=rep;r++){
+html+=`<td><input id="m-${tr.id}-${time}-${r}" value="0"></td>`;
+html+=`<td><input id="d-${tr.id}-${time}-${r}" value="0"></td>`;
+}
+html+="</tr>";
+});
 
-        html+="</table>";
-    });
+html+="</table>";
+});
 
-    document.getElementById("tables").innerHTML = html;
+document.getElementById("tables").innerHTML=html;
 }
 
-// ---------- NORMAL INV ----------
-function normalInv(p) {
-    const a=[2.515517,0.802853,0.010328];
-    const b=[1.432788,0.189269,0.001308];
-    function f(t){return (a[0]+t*(a[1]+t*a[2]))/(1+t*(b[0]+t*(b[1]+t*b[2])));}
-    if(p<0.5){let t=Math.sqrt(-2*Math.log(p)); return -(t-f(t));}
-    let t=Math.sqrt(-2*Math.log(1-p)); return t-f(t);
+function normalInv(p){
+const a=[2.515517,0.802853,0.010328];
+const b=[1.432788,0.189269,0.001308];
+function f(t){return (a[0]+t*(a[1]+t*a[2]))/(1+t*(b[0]+t*(b[1]+t*b[2])));}
+if(p<0.5){let t=Math.sqrt(-2*Math.log(p));return -(t-f(t));}
+let t=Math.sqrt(-2*Math.log(1-p));return t-f(t);
 }
 
-// ---------- ANALYSIS ----------
-function analyze() {
+function analyze(){
 
-    const treatments = getTreatments();
-    const times = getTimes();
-    const rep = getRep();
-    const n = getN();
+let t=getTreatments();
+let times=getTimes();
+let rep=getRep();
+let n=getN();
 
-    let warnings=[];
+let warn=[];
 
-    // ---- STEP 1 FIXED ----
-    const data = treatments.map(t=>{
-        let cumDead = Array(rep).fill(0);
+// STEP 1
+let data=t.map(tr=>{
+let cumDead=Array(rep).fill(0);
 
-        const timeData = times.map(time=>{
-            let affected=[];
+let td=times.map(time=>{
+let affected=[];
 
-            for(let r=1;r<=rep;r++){
-                let m = +document.getElementById(`m-${t.id}-${time}-${r}`).value;
-                let d = +document.getElementById(`d-${t.id}-${time}-${r}`).value;
+for(let r=1;r<=rep;r++){
+let m=+document.getElementById(`m-${tr.id}-${time}-${r}`).value;
+let d=+document.getElementById(`d-${tr.id}-${time}-${r}`).value;
 
-                if(m+d>n) throw Error("Invalid data");
+if(m+d>n) throw Error("Invalid input");
 
-                cumDead[r-1]+=d;
+cumDead[r-1]+=d;
+let total=Math.min(cumDead[r-1]+m,n);
 
-                let total = Math.min(cumDead[r-1]+m,n);
-                affected.push(total);
-            }
-
-            let avg = affected.reduce((a,b)=>a+b)/rep;
-            let pct = avg/n*100;
-
-            return {time,affected,pct,abbott:pct};
-        });
-
-        return {...t,timeData};
-    });
-
-    // ---- STEP 2 ABBOTT ----
-    const ctrl = data.find(t=>t.isControl);
-
-    data.forEach(t=>{
-        if(t.isControl) return;
-
-        t.timeData.forEach(td=>{
-            let ctrlPct = ctrl?.timeData.find(c=>c.time===td.time)?.pct || 0;
-
-            if(ctrlPct>=100){
-                td.abbott = NaN;
-                warnings.push("Control mortality =100%");
-                return;
-            }
-
-            if(ctrlPct>20){
-                warnings.push("⚠ Control mortality >20%");
-            }
-
-            td.abbott = Math.max(0,(td.pct-ctrlPct)/(100-ctrlPct)*100);
-        });
-    });
-
-    // ---- STEP 3 PROBIT ----
-    let probit={};
-
-    data.filter(t=>!t.isControl).forEach(t=>{
-        if(!probit[t.name]) probit[t.name]=[];
-
-        let last = t.timeData.at(-1);
-
-        probit[t.name].push({
-            conc:t.conc,
-            m:last.abbott,
-            n:n*rep
-        });
-    });
-
-    let resultHTML="";
-
-    // ---- OUTPUT ----
-    resultHTML += "<h3>Results</h3>";
-
-    warnings.forEach(w=>{
-        resultHTML+=`<div style="color:red">${w}</div>`;
-    });
-
-    data.forEach(t=>{
-        resultHTML+=`<h4>${t.name}</h4>`;
-        t.timeData.forEach(td=>{
-            resultHTML+=`Time ${td.time} → ${td.abbott.toFixed(2)}%<br>`;
-        });
-    });
-
-    resultHTML+="<hr><h3>Probit</h3>";
-
-    Object.keys(probit).forEach(name=>{
-        let pts = probit[name];
-
-        if(pts.length<2){
-            resultHTML+=`${name}: insufficient data<br>`;
-            return;
-        }
-
-        let X=[],Y=[],W=[];
-
-        pts.forEach(p=>{
-            let corr = 0.5/p.n;
-            let m = Math.max(corr*100,Math.min(100-corr*100,p.m));
-
-            let prob = normalInv(m/100)+5;
-            let logc = Math.log10(p.conc);
-
-            let w = p.n*(m/100)*(1-m/100);
-
-            X.push(logc);
-            Y.push(prob);
-            W.push(w);
-        });
-
-        let sw=0,swX=0,swY=0,swXX=0,swXY=0;
-
-        for(let i=0;i<X.length;i++){
-            sw+=W[i];
-            swX+=W[i]*X[i];
-            swY+=W[i]*Y[i];
-            swXX+=W[i]*X[i]*X[i];
-            swXY+=W[i]*X[i]*Y[i];
-        }
-
-        let slope=(sw*swXY-swX*swY)/(sw*swXX-swX*swX);
-        let intercept=(swY-slope*swX)/sw;
-
-        let lc50 = Math.pow(10,(5-intercept)/slope);
-
-        resultHTML+=`${name} → LC50 = ${lc50.toFixed(4)}<br>`;
-    });
-
-    document.getElementById("result").innerHTML = resultHTML;
+affected.push(total);
 }
 
-// init
-buildTables();
+let avg=affected.reduce((a,b)=>a+b)/rep;
+let pct=avg/n*100;
+
+return {time,pct,abbott:pct};
+});
+
+return {...tr,timeData:td};
+});
+
+// STEP 2
+let ctrl=data.find(x=>x.ctrl);
+
+data.forEach(tr=>{
+if(tr.ctrl) return;
+
+tr.timeData.forEach(td=>{
+let cp=ctrl?.timeData.find(c=>c.time==td.time)?.pct||0;
+
+if(cp>=100){td.abbott=NaN;warn.push("Control=100%");return;}
+if(cp>20) warn.push("Control >20%");
+
+td.abbott=Math.max(0,(td.pct-cp)/(100-cp)*100);
+});
+});
+
+// STEP 3 PROBIT
+let probit={};
+
+data.filter(x=>!x.ctrl).forEach(tr=>{
+if(!probit[tr.name]) probit[tr.name]=[];
+
+let last=tr.timeData.at(-1);
+
+probit[tr.name].push({
+conc:tr.conc,
+m:last.abbott,
+n:n*rep
+});
+});
+
+let html="<div class='result'>";
+
+// warnings
+[...new Set(warn)].forEach(w=>{
+html+=`<div class="warn">${w}</div>`;
+});
+
+// mortality
+data.forEach(tr=>{
+html+=`<h4>${tr.name}</h4>`;
+tr.timeData.forEach(td=>{
+html+=`<div>Time ${td.time}h → ${td.abbott.toFixed(2)}%</div>`;
+});
+});
+
+// probit
+html+="<hr><h3>Probit Analysis</h3>";
+
+Object.keys(probit).forEach(name=>{
+let pts=probit[name];
+
+if(pts.length<2){
+html+=`<div>${name}: insufficient data</div>`;
+return;
+}
+
+let X=[],Y=[],W=[];
+
+pts.forEach(p=>{
+let corr=0.5/p.n;
+let m=Math.max(corr*100,Math.min(100-corr*100,p.m));
+
+let prob=normalInv(m/100)+5;
+let logc=Math.log10(p.conc);
+
+let w=p.n*(m/100)*(1-m/100);
+
+X.push(logc);Y.push(prob);W.push(w);
+});
+
+let sw=0,swX=0,swY=0,swXX=0,swXY=0;
+
+for(let i=0;i<X.length;i++){
+sw+=W[i];
+swX+=W[i]*X[i];
+swY+=W[i]*Y[i];
+swXX+=W[i]*X[i]*X[i];
+swXY+=W[i]*X[i]*Y[i];
+}
+
+let slope=(sw*swXY-swX*swY)/(sw*swXX-swX*swX);
+let intercept=(swY-slope*swX)/sw;
+
+let lc50=Math.pow(10,(5-intercept)/slope);
+
+html+=`
+<div class="stat">
+<strong>${name}</strong><br>
+LC₅₀: ${lc50.toFixed(4)}<br>
+Slope: ${slope.toFixed(3)}
+</div>`;
+});
+
+html+=`
+<div style="margin-top:1rem;font-size:0.85rem;color:var(--muted)">
+Lower LC₅₀ → higher toxicity
+</div>`;
+
+html+="</div>";
+
+document.getElementById("result").innerHTML=html;
+}
+
+build();
 
 </script>
 
