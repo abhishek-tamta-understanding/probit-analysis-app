@@ -310,7 +310,7 @@ function build(){
   t.forEach(tr=>{
     html+=`<div class="t-group-title">${tr.name}${tr.conc?`<span class="conc-tag">${tr.conc}</span>`:''}</div>`;
     html+=`<div class="table-wrap"><table class="dtbl"><thead><tr><th>Time</th>`;
-    for(let r=1;r<=rep;r++) html+=`<th class="th-a">Rep ${r} Alive</th><th class="th-d">Rep ${r} Dead</th>`;
+    for(let r=1;r<=rep;r++) html+=`<th class="th-a">Rep ${r} Morbidity</th><th class="th-d">Rep ${r} Mortality</th>`;
     html+=`</tr></thead><tbody>`;
     times.forEach(time=>{
       html+=`<tr><td>${time}h</td>`;
@@ -338,15 +338,15 @@ function analyze(){
   const warn=[];let data;
   try{
     data=t.map(tr=>{
-      const cumDead=Array(rep).fill(0);
+      const cumMortality=Array(rep).fill(0);
       const td=times.map(time=>{
         const affected=[];
         for(let r=1;r<=rep;r++){
           const m=+document.getElementById(`m-${tr.id}-${time}-${r}`).value||0;
           const d=+document.getElementById(`d-${tr.id}-${time}-${r}`).value||0;
-          if(m+d>n) throw new Error(`Data error: alive+dead>${n} (${tr.name},${time}h,rep${r})`);
-          cumDead[r-1]+=d;
-          affected.push(Math.min(cumDead[r-1]+m,n));
+          if(m+d>n) throw new Error(`Data error: Morbidity+Mortality>${n} (${tr.name},${time}h,rep${r})`);
+          cumMortality[r-1]+=d;
+          affected.push(Math.min(cumMortality[r-1]+m,n));
         }
         const avg=affected.reduce((a,b)=>a+b)/rep,pct=avg/n*100;
         return{time,pct,abbott:pct};
