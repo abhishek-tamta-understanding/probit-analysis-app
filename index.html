@@ -28,7 +28,9 @@
             --radius: 10px;
             --radius-sm: 6px;
         }
+
         * { margin:0; padding:0; box-sizing:border-box; }
+
         body {
             font-family: 'Libre Baskerville', serif;
             background: var(--bg);
@@ -38,6 +40,8 @@
                 radial-gradient(circle at 20% 20%, rgba(138,184,64,0.06) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(45,90,27,0.05) 0%, transparent 50%);
         }
+
+        /* ── HEADER ── */
         header {
             background: var(--primary);
             color: #fff;
@@ -47,9 +51,25 @@
             gap: 1.5rem;
             box-shadow: var(--shadow-lg);
         }
-        .header-icon { font-size: 2.8rem; filter: brightness(1.3); }
-        .header-text h1 { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-        .header-text p { font-size: 0.9rem; opacity: 0.75; font-style: italic; margin-top: 0.2rem; }
+        .header-icon {
+            font-size: 2.8rem;
+            filter: brightness(1.3);
+        }
+        .header-text h1 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .header-text p {
+            font-size: 0.9rem;
+            opacity: 0.75;
+            font-style: italic;
+            margin-top: 0.2rem;
+        }
+
+        /* ── WORKFLOW STEPS ── */
         .workflow-banner {
             background: var(--surface);
             border-bottom: 2px solid var(--border);
@@ -59,98 +79,435 @@
             gap: 0;
             overflow-x: auto;
         }
-        .workflow-step { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 1.2rem; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600; color: var(--text3); background: var(--bg); border: 2px solid var(--border); white-space: nowrap; transition: all 0.3s; }
-        .workflow-step.active { color: var(--primary); background: rgba(138,184,64,0.15); border-color: var(--accent); }
-        .workflow-step.done  { color: var(--primary-light); background: rgba(138,184,64,0.08); border-color: var(--border2); }
-        .workflow-arrow { width: 2rem; text-align: center; color: var(--border2); font-size: 1rem; flex-shrink: 0; }
-        .step-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
-        .workflow-step .step-num { background: var(--text3); }
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 1.2rem;
+            border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text3);
+            background: var(--bg);
+            border: 2px solid var(--border);
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+        .workflow-step.active {
+            color: var(--primary);
+            background: rgba(138,184,64,0.15);
+            border-color: var(--accent);
+        }
+        .workflow-step.done {
+            color: var(--primary-light);
+            background: rgba(138,184,64,0.08);
+            border-color: var(--border2);
+        }
+        .workflow-arrow {
+            width: 2rem;
+            text-align: center;
+            color: var(--border2);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .step-num {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: currentColor;
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
         .workflow-step.active .step-num { background: var(--primary); }
+        .workflow-step .step-num { background: var(--text3); }
         .workflow-step.done .step-num { background: var(--accent); }
+        /* fix text color inside step-num */
         .step-num span { color: #fff; }
-        .container { max-width: 1500px; margin: 0 auto; padding: 2rem 2.5rem; }
-        .main-grid { display: grid; grid-template-columns: 480px 1fr; gap: 2rem; align-items: start; }
-        .panel { background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
-        .panel-header { background: var(--primary); color: #fff; padding: 1rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 0.6rem; }
+
+        /* ── LAYOUT ── */
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 2rem 2.5rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 480px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        /* ── PANELS ── */
+        .panel {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .panel-header {
+            background: var(--primary);
+            color: #fff;
+            padding: 1rem 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
         .panel-body { padding: 1.5rem; }
-        .section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary-light); border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin: 1.5rem 0 1rem; }
+
+        /* ── SECTION HEADINGS ── */
+        .section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary-light);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin: 1.5rem 0 1rem;
+        }
         .section-title:first-child { margin-top: 0; }
+
+        /* ── FORM ── */
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--text2); margin-bottom: 0.35rem; font-family: 'JetBrains Mono', monospace; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; background: var(--bg); color: var(--text); transition: border-color 0.2s, box-shadow 0.2s; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(138,184,64,0.15); background: #fff; }
-        .treatment-card { border: 1.5px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 0.75rem; overflow: hidden; }
+        .form-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text2);
+            margin-bottom: 0.35rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            background: var(--bg);
+            color: var(--text);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(138,184,64,0.15);
+            background: #fff;
+        }
+
+        /* ── TREATMENT CARDS ── */
+        .treatment-card {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
         .treatment-card.is-control { border-color: var(--control); }
-        .treatment-card-header { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--surface2); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; color: var(--primary); }
-        .is-control .treatment-card-header { background: rgba(96,112,128,0.1); color: var(--control); }
-        .treatment-card-body { padding: 0.75rem; display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem; }
+        .treatment-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background: var(--surface2);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .is-control .treatment-card-header {
+            background: rgba(96,112,128,0.1);
+            color: var(--control);
+        }
+        .treatment-card-body {
+            padding: 0.75rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0.75rem;
+        }
         .treatment-card-body .form-group { margin-bottom: 0; }
-        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1rem; border: none; border-radius: var(--radius-sm); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.55rem 1rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
         .btn-primary { background: var(--primary); color: #fff; }
         .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
         .btn-accent { background: var(--accent); color: var(--primary); }
         .btn-accent:hover { filter: brightness(1.05); transform: translateY(-1px); }
         .btn-control { background: var(--control); color: #fff; }
+        .btn-control:hover { filter: brightness(1.1); }
         .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { filter: brightness(1.1); }
+        .btn-warn { background: var(--warn); color: #fff; }
         .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
-        .btn-lg { width: 100%; padding: 0.85rem; font-size: 0.88rem; justify-content: center; margin-top: 1rem; letter-spacing: 1px; }
+        .btn-lg {
+            width: 100%;
+            padding: 0.85rem;
+            font-size: 0.88rem;
+            justify-content: center;
+            margin-top: 1rem;
+            letter-spacing: 1px;
+        }
         .btn-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+
+        /* ── INPUT TABLE ── */
         .input-table-wrapper { overflow-x: auto; margin-top: 0.5rem; }
-        .input-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; }
-        .input-table th { background: var(--primary); color: #fff; padding: 0.45rem 0.4rem; text-align: center; font-weight: 600; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        .input-table td { border: 1px solid var(--border); padding: 0.2rem; text-align: center; }
-        .input-table td.time-cell { background: var(--surface2); font-weight: 700; padding: 0.3rem 0.5rem; color: var(--primary); }
-        .input-table input[type="number"] { width: 38px; border: none; background: transparent; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; padding: 0.2rem; color: var(--text); }
-        .input-table input:focus { background: rgba(138,184,64,0.15); outline: none; }
+        .input-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+        }
+        .input-table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.45rem 0.4rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .input-table td {
+            border: 1px solid var(--border);
+            padding: 0.2rem;
+            text-align: center;
+        }
+        .input-table td.time-cell {
+            background: var(--surface2);
+            font-weight: 700;
+            padding: 0.3rem 0.5rem;
+            color: var(--primary);
+        }
+        .input-table input {
+            width: 38px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            padding: 0.2rem;
+            color: var(--text);
+        }
+        .input-table input:focus {
+            background: rgba(138,184,64,0.15);
+            outline: none;
+        }
         .input-table tr:nth-child(even) td { background: rgba(138,184,64,0.04); }
         .input-table tr:hover td { background: rgba(138,184,64,0.08); }
         .input-table tr:hover td.time-cell { background: var(--surface2); }
-        .results-panel { position: sticky; top: 1rem; }
+
+        /* ── RESULTS ── */
+        .results-panel {
+            position: sticky;
+            top: 1rem;
+        }
         #results-content { padding: 1.5rem; }
-        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text3); }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text3);
+        }
         .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
         .empty-state p { font-style: italic; font-size: 0.9rem; }
+
+        /* Results output tables */
         .result-section { margin-bottom: 2.5rem; }
-        .result-section-title { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .result-section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
         .result-table-wrap { overflow-x: auto; }
-        .result-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; }
-        .result-table th { background: var(--primary); color: #fff; padding: 0.5rem 0.4rem; text-align: center; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.4px; }
-        .result-table td { border: 1px solid var(--border); padding: 0.4rem 0.5rem; text-align: center; }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+        }
+        .result-table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 0.5rem 0.4rem;
+            text-align: center;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .result-table td {
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.5rem;
+            text-align: center;
+        }
         .result-table tr:nth-child(even) td { background: var(--bg); }
         .result-table tr:hover td { background: rgba(138,184,64,0.08); }
         .result-table .highlight { color: var(--accent); font-weight: 700; }
         .result-table .warn-cell { color: var(--warn); font-weight: 700; }
         .result-table .danger-cell { color: var(--danger); font-weight: 700; }
         .result-table .control-cell { color: var(--control); }
-        .result-table td.time-label { background: var(--surface2); font-weight: 700; color: var(--primary); }
-        /* abbott dark header */
-        .th-abbott { background: #1e4a10 !important; }
+
+        /* Probit section */
+        .probit-summary-table th:nth-child(n+4) { background: #1e4a10; }
         .probit-lc15 { color: #5aa832; font-weight: 700; }
         .probit-lc25 { color: #7ab032; font-weight: 700; }
         .probit-lc50 { color: var(--warn); font-weight: 700; }
         .probit-lc90 { color: var(--danger); font-weight: 700; }
-        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin: 1rem 0; }
-        .stat-box { background: var(--bg); border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem; text-align: center; }
-        .stat-box .stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); margin-bottom: 0.25rem; }
-        .stat-box .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--primary); }
+
+        /* Info/stat boxes */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        .stat-box {
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+            text-align: center;
+        }
+        .stat-box .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text3);
+            margin-bottom: 0.25rem;
+        }
+        .stat-box .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
         .stat-box.accent .stat-value { color: var(--accent); }
         .stat-box.warn .stat-value { color: var(--warn); }
         .stat-box.danger .stat-value { color: var(--danger); }
-        .info-box { background: rgba(138,184,64,0.1); border-left: 3px solid var(--accent); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 0.75rem 1rem; font-size: 0.82rem; color: var(--text2); margin: 0.75rem 0; }
-        .warn-box { background: rgba(212,118,58,0.1); border-left: 3px solid var(--warn); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 0.75rem 1rem; font-size: 0.82rem; color: var(--text); margin: 0.75rem 0; }
-        .error-box { background: rgba(193,69,58,0.1); border-left: 3px solid var(--danger); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--danger); margin: 0.75rem 0; }
-        .divider { border: none; border-top: 2px solid var(--border); margin: 1.5rem 0; }
-        .spinner { display: inline-block; width: 16px; height: 16px; border: 2.5px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+
+        .info-box {
+            background: rgba(138,184,64,0.1);
+            border-left: 3px solid var(--accent);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: var(--text2);
+            margin: 0.75rem 0;
+        }
+        .warn-box {
+            background: rgba(212,118,58,0.1);
+            border-left: 3px solid var(--warn);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: var(--text);
+            margin: 0.75rem 0;
+        }
+        .error-box {
+            background: rgba(193,69,58,0.1);
+            border-left: 3px solid var(--danger);
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            color: var(--danger);
+            margin: 0.75rem 0;
+        }
+
+        .divider {
+            border: none;
+            border-top: 2px solid var(--border);
+            margin: 1.5rem 0;
+        }
+
+        /* Loading */
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2.5px solid rgba(255,255,255,0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
+
         .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Ranking bar */
         .rank-bar-wrap { display: flex; align-items: center; gap: 0.5rem; }
-        .rank-bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--primary)); min-width: 4px; transition: width 0.5s ease; }
-        .probit-data-section { border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 1rem; }
-        .probit-data-header { background: var(--surface2); padding: 0.5rem 0.75rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; color: var(--primary); text-transform: uppercase; }
-        @media (max-width: 1100px) { .main-grid { grid-template-columns: 1fr; } .results-panel { position: static; } }
-        @media (max-width: 600px) { .container { padding: 1rem; } header { padding: 1.2rem 1rem; flex-direction: column; text-align: center; } .form-row { grid-template-columns: 1fr; } .treatment-card-body { grid-template-columns: 1fr; } }
+        .rank-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            min-width: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Probit data table */
+        .probit-data-section {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+        .probit-data-header {
+            background: var(--surface2);
+            padding: 0.5rem 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 1100px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .results-panel { position: static; }
+        }
+        @media (max-width: 600px) {
+            .container { padding: 1rem; }
+            header { padding: 1.2rem 1rem; flex-direction: column; text-align: center; }
+            .form-row { grid-template-columns: 1fr; }
+            .treatment-card-body { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -159,16 +516,23 @@
     <div class="header-icon">🔬</div>
     <div class="header-text">
         <h1>Advanced Insect Toxicology Analyzer</h1>
-        <p>Raw bioassay data → Cumulative M+D (capped at n) → Abbott's corrected mortality → Probit analysis</p>
+        <p>Raw bioassay data → Abbott's corrected mortality → Probit analysis (LC₁₅ · LC₂₅ · LC₅₀ · LC₉₀)</p>
     </div>
 </header>
 
+<!-- Workflow Banner -->
 <div class="workflow-banner">
-    <div class="workflow-step active" id="step-badge-1"><div class="step-num"><span>1</span></div> Enter Raw Observation Data</div>
+    <div class="workflow-step active" id="step-badge-1">
+        <div class="step-num"><span>1</span></div> Enter Raw Observation Data
+    </div>
     <div class="workflow-arrow">→</div>
-    <div class="workflow-step" id="step-badge-2"><div class="step-num"><span>2</span></div> Cumulative M+D → Mortality % → Abbott's</div>
+    <div class="workflow-step" id="step-badge-2">
+        <div class="step-num"><span>2</span></div> Calculate Mortality + Abbott's Correction
+    </div>
     <div class="workflow-arrow">→</div>
-    <div class="workflow-step" id="step-badge-3"><div class="step-num"><span>3</span></div> Probit Analysis (LC Values)</div>
+    <div class="workflow-step" id="step-badge-3">
+        <div class="step-num"><span>3</span></div> Probit Analysis (LC Values)
+    </div>
 </div>
 
 <div class="container">
@@ -221,18 +585,20 @@
                         <input type="text" id="obs-times" value="24, 48, 72" placeholder="e.g., 6, 12, 24, 48" onchange="rebuildTables()">
                     </div>
 
+                    <!-- ── TREATMENTS ── -->
                     <div class="section-title">Treatments & Controls</div>
+
                     <div id="treatments-container"></div>
+
                     <div class="btn-row">
                         <button class="btn btn-accent" onclick="addTreatment()">＋ Treatment</button>
                         <button class="btn btn-control" onclick="addControl()">＋ Control</button>
                     </div>
 
-                    <div class="section-title" style="margin-top:2rem;">Observation Data — NEW Morbid &amp; Dead at Each Time Point</div>
+                    <!-- ── DATA INPUT TABLES ── -->
+                    <div class="section-title" style="margin-top:2rem;">Observation Data (Morbid &amp; Dead per Replication)</div>
                     <div class="info-box" style="margin-top:0; margin-bottom:0.5rem; font-size:0.78rem;">
-                        Enter <strong>NEW</strong> morbid (M) and dead (D) counts observed at each time point.
-                        The tool automatically accumulates cumulative M+D per replication and <strong>caps it at the insects-per-replication limit</strong>.
-                        If cumulative M+D would exceed the cap, it is set to the cap value automatically.
+                        Enter <strong>new</strong> morbid + dead counts at each time point (not cumulative — the tool accumulates automatically).
                     </div>
 
                     <div id="data-tables-container"></div>
@@ -258,8 +624,8 @@
             </div>
         </div>
 
-    </div>
-</div>
+    </div><!-- /main-grid -->
+</div><!-- /container -->
 
 <script>
 // ─────────────────────────────────────────────
@@ -372,13 +738,15 @@ function rebuildTables() {
     treatments.forEach(t => {
         const wrapper = document.createElement('div');
         wrapper.style.marginBottom = '1.5rem';
-
-        // Build thead: time | Rep1 Morbid | Rep1 Dead | Rep2 Morbid | Rep2 Dead ...
         let thead = '<tr>';
         thead += '<th>Time (h)</th>';
-        for (let r = 1; r <= numReps; r++) thead += `<th colspan="2">Rep ${r} (New)</th>`;
+        for (let r = 1; r <= numReps; r++) {
+            thead += `<th colspan="2">Rep ${r}</th>`;
+        }
         thead += '</tr><tr><th></th>';
-        for (let r = 1; r <= numReps; r++) thead += '<th>Morbid</th><th>Dead</th>';
+        for (let r = 1; r <= numReps; r++) {
+            thead += '<th>Morbid</th><th>Dead</th>';
+        }
         thead += '</tr>';
 
         let tbody = '';
@@ -407,6 +775,7 @@ function rebuildTables() {
         container.appendChild(wrapper);
     });
 
+    // restore saved
     setTimeout(() => {
         Object.entries(saved).forEach(([id, val]) => {
             const el = document.getElementById(id);
@@ -440,9 +809,11 @@ function runFullAnalysis() {
     const btn = document.getElementById('analyze-btn');
     btn.innerHTML = '<span class="spinner"></span> Analyzing…';
     btn.disabled = true;
+
     setTimeout(() => {
-        try { _doAnalysis(); }
-        catch(e) {
+        try {
+            _doAnalysis();
+        } catch(e) {
             document.getElementById('results-content').innerHTML =
                 `<div class="error-box" style="margin:1.5rem;"><strong>Error:</strong> ${e.message}</div>`;
         } finally {
@@ -458,62 +829,41 @@ function _doAnalysis() {
     const times = getObsTimes();
     if (!times.length) throw new Error('Enter observation time points.');
     const numReps = getNumReps();
-    const n = getInsectsPerRep(); // insects per single replication
+    const n = getInsectsPerRep();
     const title = document.getElementById('exp-title').value || 'Toxicology Experiment';
 
-    // ══════════════════════════════════════════════════════════════
-    //  STEP 1: Collect raw NEW observations, compute CUMULATIVE M+D
-    //          per replication, CAPPED at n (insects per rep).
-    //
-    //  Logic:
-    //  - At each time point, user enters NEW morbid (m) and NEW dead (d).
-    //  - cumMorbid[r] = running total of morbid insects (those currently morbid, not yet dead).
-    //    But for our purposes, we track cumulative (M+D) total affected.
-    //  - cumAffected[r] += newM + newD, then cap at n.
-    //  - Mortality % at time t = (avg cumAffected across reps / n) × 100
-    // ══════════════════════════════════════════════════════════════
-
+    // ── Step 1: collect raw data & compute cumulative mortality ──
     const treatmentData = treatments.map(t => {
-        // Cumulative affected count per replication (carries across time points)
-        const cumAffected = new Array(numReps).fill(0);
         const timeData = [];
+        // cumulative per replication
+        const cumRep = new Array(numReps).fill(0);
 
         times.forEach(time => {
-            const repsRaw = [];
-
+            const reps = [];
             for (let r = 1; r <= numReps; r++) {
-                const newM = parseInt(document.getElementById(`d-${t.id}-${time}-${r}-m`)?.value) || 0;
-                const newD = parseInt(document.getElementById(`d-${t.id}-${time}-${r}-d`)?.value) || 0;
-                repsRaw.push({ newM, newD, newMD: newM + newD });
+                const m = parseInt(document.getElementById(`d-${t.id}-${time}-${r}-m`)?.value) || 0;
+                const d = parseInt(document.getElementById(`d-${t.id}-${time}-${r}-d`)?.value) || 0;
+                reps.push({ m, d, newAffected: m + d });
             }
-
-            // Accumulate per replication, cap at n
-            const cumThisTime = [];
-            for (let r = 0; r < numReps; r++) {
-                cumAffected[r] = Math.min(n, cumAffected[r] + repsRaw[r].newMD);
-                cumThisTime.push(cumAffected[r]);
-            }
-
-            // Mortality % = average cumulative affected / n × 100
-            const avgCum = cumThisTime.reduce((a, b) => a + b, 0) / numReps;
-            const mortalityPct = (avgCum / n) * 100;
-
+            // accumulate
+            reps.forEach((rep, i) => {
+                cumRep[i] = Math.min(cumRep[i] + rep.newAffected, n);
+            });
+            const avgCum = cumRep.reduce((a,b)=>a+b,0) / numReps;
+            const pct = (avgCum / n) * 100;
             timeData.push({
                 time,
-                repsRaw,                    // new M, new D per rep this time point
-                cumPerRep: [...cumThisTime], // cumulative M+D per rep (capped)
-                mortalityPct,               // % mortality before Abbott's
-                abbottPct: mortalityPct     // will be overwritten for non-controls
+                repsRaw: reps,
+                cumPerRep: [...cumRep],
+                mortalityPct: pct,
+                abbottPct: pct  // placeholder; recalculated below
             });
         });
 
         return { ...t, timeData };
     });
 
-    // ══════════════════════════════════════════════════════════════
-    //  STEP 2: Abbott's Correction
-    //  C% = [(T% − Ctrl%) / (100 − Ctrl%)] × 100
-    // ══════════════════════════════════════════════════════════════
+    // ── Step 2: Abbott's correction ──
     const ctrlData = treatmentData.find(t => t.isControl);
 
     treatmentData.forEach(t => {
@@ -524,14 +874,15 @@ function _doAnalysis() {
             if (ctrlPct >= 100) {
                 td.abbottPct = td.mortalityPct;
             } else {
-                td.abbottPct = Math.max(0, ((td.mortalityPct - ctrlPct) / (100 - ctrlPct)) * 100);
+                td.abbottPct = Math.max(0,
+                    ((td.mortalityPct - ctrlPct) / (100 - ctrlPct)) * 100
+                );
             }
         });
     });
 
-    // ══════════════════════════════════════════════════════════════
-    //  STEP 3: Probit — group non-control by insecticide name
-    // ══════════════════════════════════════════════════════════════
+    // ── Step 3: Probit analysis using FINAL time point's Abbott's % for each treatment+conc ──
+    // Group non-control treatments by insecticide name; each concentration is one data point
     const probitGroups = {};
     treatmentData.filter(t => !t.isControl).forEach(t => {
         if (!probitGroups[t.name]) probitGroups[t.name] = [];
@@ -539,127 +890,119 @@ function _doAnalysis() {
         probitGroups[t.name].push({
             conc: t.conc,
             mortalityPct: finalTd.abbottPct,
-            n: n * numReps   // total insects for that treatment (all reps combined)
+            insectsTested: n * numReps
         });
     });
 
+    // run probit per insecticide
     const probitResults = {};
     Object.keys(probitGroups).forEach(insecticide => {
-        const pts = probitGroups[insecticide].sort((a, b) => a.conc - b.conc);
-        probitResults[insecticide] = pts.length >= 2
-            ? calcProbit(pts)
-            : { insufficient: true, pts };
+        const pts = probitGroups[insecticide].sort((a,b)=>a.conc-b.conc);
+        if (pts.length >= 2) {
+            probitResults[insecticide] = calcProbit(pts);
+        } else {
+            probitResults[insecticide] = { insufficient: true, pts };
+        }
     });
 
+    // ── Render ──
     renderResults(title, treatmentData, probitResults, n, numReps);
     setBadgeDone();
 }
 
-// ═════════════════════════════════════════════════════════════════
-//  PROBIT MATH  (Finney 1971 / Bliss 1935 method)
-// ═════════════════════════════════════════════════════════════════
-function normCDF(z) {
-    const p = 0.2316419;
-    const b = [0.319381530, -0.356563782, 1.781477937, -1.821255978, 1.330274429];
-    const t = 1 / (1 + p * Math.abs(z));
-    const poly = t*(b[0]+t*(b[1]+t*(b[2]+t*(b[3]+t*b[4]))));
-    const phi = 1 - poly * Math.exp(-0.5*z*z) / Math.sqrt(2*Math.PI);
-    return z >= 0 ? phi : 1 - phi;
-}
-function normPDF(z) { return Math.exp(-0.5*z*z) / Math.sqrt(2*Math.PI); }
+// ─────────────────────────────────────────────
+//  PROBIT MATH
+// ─────────────────────────────────────────────
 function normalInv(p) {
-    p = Math.max(1e-9, Math.min(1 - 1e-9, p));
-    const sign = p < 0.5 ? -1 : 1;
-    const q = p < 0.5 ? p : 1 - p;
-    const t = Math.sqrt(-2 * Math.log(q));
-    const c = [2.515517, 0.802853, 0.010328];
-    const d = [1.432788, 0.189269, 0.001308];
-    const z = t - (c[0] + t*(c[1] + t*c[2])) / (1 + t*(d[0] + t*(d[1] + t*d[2])));
-    return sign * z;
+    p = Math.max(1e-9, Math.min(1-1e-9, p));
+    const a = [2.515517,0.802853,0.010328];
+    const b = [1.432788,0.189269,0.001308];
+    function rational(t) {
+        return (a[0]+t*(a[1]+t*a[2]))/(1+t*(b[0]+t*(b[1]+t*b[2])));
+    }
+    if (p < 0.5) {
+        const t = Math.sqrt(-2*Math.log(p));
+        return -(t - rational(t));
+    } else {
+        const t = Math.sqrt(-2*Math.log(1-p));
+        return t - rational(t);
+    }
 }
-function blissFactors(mortPct) {
-    const pct  = Math.max(0.01, Math.min(99.99, mortPct));
-    const prob = pct / 100;
-    const EP   = normalInv(prob) + 5;
-    const zVal = normPDF(EP - 5);
-    const y0   = EP - zVal / prob;
-    const k    = (zVal * zVal) / (prob * (1 - prob));
-    const WC   = zVal / (prob * (1 - prob));
-    return { y0, k, WC, z: zVal, prob, EP };
-}
+
 function calcProbit(pts) {
+    // constrain mortality to valid range for probit
     const data = pts.map(p => {
-        const { y0, k, WC, z, prob, EP } = blissFactors(p.mortalityPct);
-        const logC = Math.log10(Math.max(p.conc, 1e-12));
-        const Yi   = EP;
-        const wi   = p.n * WC;
-        return { ...p, y0, k, WC, z, prob, EP, logC, Yi, wi };
+        const m = Math.max(0.5, Math.min(99.5, p.mortalityPct));
+        const probit = normalInv(m/100) + 5;
+        const logC = Math.log10(Math.max(p.conc, 1e-10));
+        return { ...p, probit, logC, m };
     });
 
-    let SW=0, SWX=0, SWY=0, SWXX=0, SWXY=0;
+    // weighted least squares (weights = n * p*(1-p))
+    const n = data.length;
+    let swX=0, swY=0, swXX=0, swXY=0, sw=0;
     data.forEach(d => {
-        SW   += d.wi;
-        SWX  += d.wi * d.logC;
-        SWY  += d.wi * d.Yi;
-        SWXX += d.wi * d.logC * d.logC;
-        SWXY += d.wi * d.logC * d.Yi;
+        const phat = d.m/100;
+        const w = Math.max(0.01, phat*(1-phat));
+        sw   += w;
+        swX  += w*d.logC;
+        swY  += w*d.probit;
+        swXX += w*d.logC*d.logC;
+        swXY += w*d.logC*d.probit;
     });
+    const denom = sw*swXX - swX*swX;
+    const slope = denom !== 0 ? (sw*swXY - swX*swY)/denom : 1;
+    const intercept = (swY - slope*swX)/sw;
 
-    const D     = SW * SWXX - SWX * SWX;
-    const slope = D !== 0 ? (SW * SWXY - SWX * SWY) / D : 0;
-    const intercept = (SWY - slope * SWX) / SW;
-
-    let ssRes = 0;
+    // R²
+    const meanY = swY/sw;
+    let ssTot=0, ssRes=0;
     data.forEach(d => {
-        const pred = intercept + slope * d.logC;
-        ssRes += d.wi * Math.pow(d.Yi - pred, 2);
+        const pred = intercept + slope*d.logC;
+        const w = Math.max(0.01, (d.m/100)*(1-d.m/100));
+        ssTot += w*Math.pow(d.probit-meanY,2);
+        ssRes += w*Math.pow(d.probit-pred,2);
     });
-    const df  = Math.max(1, data.length - 2);
-    const mse = ssRes / df;
+    const r2 = ssTot > 0 ? Math.max(0, 1-ssRes/ssTot) : 0;
 
-    const targets = { LC1:2.674, LC5:3.355, LC10:3.718, LC15:3.964, LC25:4.326,
-                      LC30:4.476, LC50:5.000, LC75:5.674, LC90:6.282, LC95:6.645, LC99:7.326 };
+    // SE of slope
+    const mse = n > 2 ? ssRes/(n-2) : ssRes;
+    const sxx = swXX - swX*swX/sw;
+    const slopeStdErr = sxx > 0 ? Math.sqrt(mse/sxx) : 0;
+
+    // LC values
+    const targets = { LC15:3.963, LC25:4.326, LC30:4.476, LC50:5.000, LC75:5.674, LC90:6.282 };
     const lcValues = {};
     Object.entries(targets).forEach(([lc, pv]) => {
-        lcValues[lc] = Math.abs(slope) < 1e-10 ? NaN : Math.pow(10, (pv - intercept) / slope);
+        const logC = (pv - intercept) / slope;
+        lcValues[lc] = Math.pow(10, logC);
     });
 
-    const m50  = (5.0 - intercept) / slope;
-    const Xbar = SWX / SW;
-    const Sxx  = SWXX - SWX * SWX / SW;
-    const varM50 = mse * (1/SW + Math.pow(m50 - Xbar, 2) / Sxx) / (slope * slope);
-    const ci     = 1.96 * Math.sqrt(Math.max(0, varM50));
-    const fl50   = { lower: Math.pow(10, m50 - ci), upper: Math.pow(10, m50 + ci) };
+    // 95% Fiducial limits for LC50 (simplified)
+    const lc50LogC = (5.0 - intercept)/slope;
+    const g = 1.96*1.96 / (slope*slope * sxx / mse);
+    const flHalfWidth = g < 1 ? Math.abs(1.96 * Math.sqrt(mse) * Math.sqrt(1/sw + Math.pow(lc50LogC - swX/sw, 2)/sxx)) / Math.abs(slope) : 0.2;
+    const fl = {
+        lower: Math.pow(10, lc50LogC - flHalfWidth),
+        upper: Math.pow(10, lc50LogC + flHalfWidth)
+    };
 
-    const m95    = (6.645 - intercept) / slope;
-    const varM95 = mse * (1/SW + Math.pow(m95 - Xbar, 2) / Sxx) / (slope * slope);
-    const ci95   = 1.96 * Math.sqrt(Math.max(0, varM95));
-    const fl95   = { lower: Math.pow(10, m95 - ci95), upper: Math.pow(10, m95 + ci95) };
-
+    // Heterogeneity chi-square
     let chi2 = 0;
     data.forEach(d => {
-        const predProbit = intercept + slope * d.logC;
-        const predPct    = normCDF(predProbit - 5) * 100;
-        const pi         = Math.max(0.001, Math.min(0.999, predPct / 100));
-        chi2 += d.n * Math.pow((d.mortalityPct/100) - pi, 2) / (pi * (1 - pi));
+        const expected = intercept + slope*d.logC;
+        chi2 += Math.pow(d.probit - expected, 2);
     });
-    const chi2df  = Math.max(1, data.length - 2);
-    const critChi2 = [3.841, 5.991, 7.815, 9.488, 11.07, 12.59][Math.min(chi2df - 1, 5)];
-    const sig = chi2 > critChi2;
-
-    const Ybar = SWY / SW;
-    let ssTot = 0;
-    data.forEach(d => { ssTot += d.wi * Math.pow(d.Yi - Ybar, 2); });
-    const r2 = ssTot > 0 ? Math.max(0, 1 - ssRes / ssTot) : 0;
-    const slopeSE = Sxx > 0 ? Math.sqrt(mse / Sxx) : 0;
+    const df = Math.max(1, n-2);
+    const critChi = df === 1 ? 3.84 : df === 2 ? 5.99 : df === 3 ? 7.81 : 9.49;
+    const sig = chi2 > critChi;
 
     return {
-        data, slope, intercept, r2, slopeSE,
-        lcValues, fl50, fl95,
-        chi2, chi2df, sig, critChi2,
-        equation: `Probit = ${intercept.toFixed(4)} + ${slope.toFixed(4)} × log₁₀(C)`,
-        minConc: Math.min(...pts.map(p => p.conc)),
-        maxConc: Math.max(...pts.map(p => p.conc))
+        data, slope, intercept, r2, slopeStdErr,
+        lcValues, fl, chi2, df, sig,
+        equation: `y = ${intercept.toFixed(3)} + ${slope.toFixed(3)}x`,
+        minConc: Math.min(...pts.map(p=>p.conc)),
+        maxConc: Math.max(...pts.map(p=>p.conc))
     };
 }
 
@@ -670,7 +1013,7 @@ function renderResults(title, treatmentData, probitResults, n, numReps) {
     const rc = document.getElementById('results-content');
     let html = '';
 
-    // Title bar
+    // ── Title ──
     html += `
         <div style="padding:1.5rem 1.5rem 0;">
             <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -686,148 +1029,111 @@ function renderResults(title, treatmentData, probitResults, n, numReps) {
 
     html += `<div style="padding:0 1.5rem;">`;
 
-    // ═══════════════════════════════════════════════════
-    //  SECTION A: Mortality Tables with all required cols
-    // ═══════════════════════════════════════════════════
+    // ─── SECTION A: Mortality Tables ───
     html += `<div class="result-section">
-        <div class="result-section-title">📋 Steps 1 & 2 — Cumulative Mortality &amp; Abbott's Correction</div>
+        <div class="result-section-title">📋 Step 1 + 2 — Raw Mortality &amp; Abbott's Correction</div>
         <div class="info-box" style="margin-top:0; font-size:0.78rem;">
-            <strong>Columns explained:</strong><br>
-            • <em>New M / New D</em>: freshly observed morbid / dead at this time point.<br>
-            • <em>Cum. M+D (R1, R2…)</em>: cumulative morbid+dead per replication, 
-              <strong>capped at ${n}</strong> (insects per rep).<br>
-            • <em>Morbidity+Mortality %</em>: (avg cumulative M+D / ${n}) × 100, before correction.<br>
-            • <em>Abbott's Corrected %</em>: [(T% − Ctrl%) / (100 − Ctrl%)] × 100.
+            Cumulative morbid+dead is accumulated across time points. Abbott's formula corrects for natural mortality in control:
+            <strong>C% = [(T% − Ctrl%) / (100 − Ctrl%)] × 100</strong>
         </div>`;
 
     treatmentData.forEach(t => {
         const isCtrl = t.isControl;
-
-        // Build table header
-        // Columns: Time | [Rep1: New M, New D, Cum M+D] × numReps | Avg Cum M+D | Morbidity+Mortality % | [Abbott's %]
         html += `
-            <div style="margin-bottom:1.75rem;">
+            <div style="margin-bottom:1.5rem;">
                 <div style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; font-weight:700;
                             color:${isCtrl ? 'var(--control)' : 'var(--primary)'}; margin-bottom:0.4rem;">
                     ${t.name} ${isCtrl ? '— CONTROL' : `(${t.conc}%)`}
-                    ${isCtrl ? '<span style="font-size:0.65rem; background:var(--control);color:#fff;border-radius:3px;padding:1px 5px;margin-left:6px;">CONTROL</span>' : ''}
                 </div>
                 <div class="result-table-wrap">
                 <table class="result-table">
                     <thead>
                         <tr>
-                            <th rowspan="2">Time<br>(h)</th>`;
-        for (let r = 1; r <= numReps; r++) {
-            html += `<th colspan="3" style="background:#1a4a0e;">Rep ${r}</th>`;
-        }
-        html += `<th rowspan="2">Avg Cum<br>M+D</th>
-                            <th rowspan="2">Morbidity+<br>Mortality %</th>`;
-        if (!isCtrl) {
-            html += `<th rowspan="2" class="th-abbott">Abbott's<br>Corrected %</th>`;
-        }
+                            <th rowspan="2">Time (h)</th>`;
+        for (let r=1; r<=numReps; r++) html += `<th colspan="3">Rep ${r}</th>`;
+        html += `<th rowspan="2">Cum. Affected<br>[R1, R2…]</th>
+                            <th rowspan="2">Mortality %</th>`;
+        if (!isCtrl) html += `<th rowspan="2" style="background:#1e4a10;">Abbott's %</th>`;
         html += `</tr><tr>`;
-        for (let r = 1; r <= numReps; r++) {
-            html += `<th style="background:#1a4a0e;">New M</th>
-                     <th style="background:#1a4a0e;">New D</th>
-                     <th style="background:#1a4a0e;">Cum M+D</th>`;
-        }
+        for (let r=1; r<=numReps; r++) html += `<th>M</th><th>D</th><th>M+D</th>`;
         html += `</tr></thead><tbody>`;
 
         t.timeData.forEach(td => {
-            const avgCum = td.cumPerRep.reduce((a, b) => a + b, 0) / numReps;
-
-            html += `<tr><td class="time-label">${td.time}h</td>`;
-
-            for (let r = 0; r < numReps; r++) {
-                const rep = td.repsRaw[r] || { newM: 0, newD: 0 };
-                const cum = td.cumPerRep[r];
-                const capHit = cum >= n;
-                html += `<td>${rep.newM}</td>
-                          <td>${rep.newD}</td>
-                          <td style="${capHit ? 'color:var(--danger);font-weight:700;' : 'font-weight:600;'}">${cum}${capHit ? ' ⚠' : ''}</td>`;
+            html += `<tr><td class="time-cell" style="background:var(--surface2);font-weight:700;">${td.time}h</td>`;
+            for (let r=0; r<numReps; r++) {
+                const rep = td.repsRaw[r] || {m:0,d:0};
+                html += `<td>${rep.m}</td><td>${rep.d}</td><td><b>${rep.m+rep.d}</b></td>`;
             }
-
-            html += `<td><b>${avgCum.toFixed(2)}</b></td>`;
-
-            const mortPct = td.mortalityPct;
-            const mortCls = mortPct >= 80 ? 'danger-cell' : mortPct >= 50 ? 'warn-cell' : 'highlight';
-            html += `<td class="${mortCls}"><b>${mortPct.toFixed(2)}%</b></td>`;
-
+            html += `<td><b>[${td.cumPerRep.join(', ')}]</b></td>`;
+            html += `<td><b>${td.mortalityPct.toFixed(1)}%</b></td>`;
             if (!isCtrl) {
-                const abb = td.abbottPct;
-                const abbCls = abb >= 80 ? 'danger-cell' : abb >= 50 ? 'warn-cell' : 'highlight';
-                html += `<td class="${abbCls}" style="background:rgba(30,74,16,0.05);"><b>${abb.toFixed(2)}%</b></td>`;
+                const cls = td.abbottPct >= 80 ? 'danger-cell' : td.abbottPct >= 50 ? 'warn-cell' : 'highlight';
+                html += `<td class="${cls}"><b>${td.abbottPct.toFixed(1)}%</b></td>`;
             }
-
             html += `</tr>`;
         });
-
         html += `</tbody></table></div>`;
 
-        // Quick stat boxes for non-control treatments
+        // mini stats
+        const finalTd = t.timeData[t.timeData.length-1];
         if (!isCtrl) {
-            const finalTd = t.timeData[t.timeData.length - 1];
             const lt50 = t.timeData.find(td => td.abbottPct >= 50);
             html += `<div class="stat-grid" style="margin-top:0.75rem;">
-                <div class="stat-box ${finalTd.abbottPct >= 80 ? 'danger' : finalTd.abbottPct >= 50 ? 'warn' : 'accent'}">
+                <div class="stat-box ${finalTd.abbottPct>=80?'danger':finalTd.abbottPct>=50?'warn':'accent'}">
                     <div class="stat-label">Final Abbott's %</div>
                     <div class="stat-value">${finalTd.abbottPct.toFixed(1)}%</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-label">Final M+M %</div>
+                    <div class="stat-label">Final Mortality %</div>
                     <div class="stat-value">${finalTd.mortalityPct.toFixed(1)}%</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-label">LT₅₀ Estimate</div>
-                    <div class="stat-value">${lt50 ? lt50.time + 'h' : '>' + t.timeData[t.timeData.length - 1].time + 'h'}</div>
+                    <div class="stat-value">${lt50 ? lt50.time+'h' : '>'+t.timeData[t.timeData.length-1].time+'h'}</div>
                 </div>
             </div>`;
         }
-
         html += `</div>`;
     });
+    html += `</div>`; // close section A
 
-    html += `</div>`;
-
-    // ═══════════════════════════════════════════════════
-    //  SECTION B: Comparative Ranking
-    // ═══════════════════════════════════════════════════
-    const nonCtrl = treatmentData.filter(t => !t.isControl);
+    // ─── SECTION B: Comparative Ranking ───
+    const nonCtrl = treatmentData.filter(t=>!t.isControl);
     if (nonCtrl.length > 1) {
-        const ranked = [...nonCtrl].sort((a, b) =>
-            b.timeData[b.timeData.length - 1].abbottPct - a.timeData[a.timeData.length - 1].abbottPct
+        const ranked = [...nonCtrl].sort((a,b) =>
+            b.timeData[b.timeData.length-1].abbottPct - a.timeData[a.timeData.length-1].abbottPct
         );
-        const maxPct = ranked[0].timeData[ranked[0].timeData.length - 1].abbottPct;
+        const maxPct = ranked[0].timeData[ranked[0].timeData.length-1].abbottPct;
         html += `<div class="result-section">
             <div class="result-section-title">🏆 Comparative Efficacy Ranking (Final Abbott's %)</div>
             <div style="display:grid; gap:0.6rem;">`;
         ranked.forEach((t, i) => {
-            const pct = t.timeData[t.timeData.length - 1].abbottPct;
-            const barW = maxPct > 0 ? (pct / maxPct * 100) : 0;
+            const pct = t.timeData[t.timeData.length-1].abbottPct;
+            const barW = maxPct > 0 ? (pct/maxPct*100) : 0;
             html += `<div style="display:flex; align-items:center; gap:0.75rem; font-family:'JetBrains Mono',monospace; font-size:0.78rem;">
-                <div style="width:1.2rem; text-align:right; color:var(--text3);">${i + 1}.</div>
-                <div style="width:140px; color:var(--primary); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.name} (${t.conc}%)</div>
-                <div class="rank-bar-wrap" style="flex:1;"><div class="rank-bar" style="width:${barW}%;"></div></div>
-                <div style="width:55px; text-align:right; font-weight:700; color:${pct >= 80 ? 'var(--danger)' : pct >= 50 ? 'var(--warn)' : 'var(--accent)'};">${pct.toFixed(1)}%</div>
+                <div style="width:1.2rem; text-align:right; color:var(--text3);">${i+1}.</div>
+                <div style="width:120px; color:var(--primary); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.name} (${t.conc}%)</div>
+                <div class="rank-bar-wrap" style="flex:1;">
+                    <div class="rank-bar" style="width:${barW}%;"></div>
+                </div>
+                <div style="width:50px; text-align:right; font-weight:700; color:${pct>=80?'var(--danger)':pct>=50?'var(--warn)':'var(--accent)'};">${pct.toFixed(1)}%</div>
             </div>`;
         });
         html += `</div></div>`;
     }
 
-    // ═══════════════════════════════════════════════════
-    //  SECTION C: Probit
-    // ═══════════════════════════════════════════════════
+    // ─── SECTION C: Probit Analysis ───
     html += `<div class="result-section">
-        <div class="result-section-title">📈 Step 3 — Probit Analysis (Finney / Bliss Method)</div>
+        <div class="result-section-title">📈 Step 3 — Probit Analysis (LC Values)</div>
         <div class="info-box" style="margin-top:0; font-size:0.78rem;">
-            Uses <strong>Bliss (1935) working probits</strong> with weighted least squares.
-            LC values: <strong>log LC<sub>p</sub> = (probit<sub>p</sub> − a) / b</strong>.
-            Confidence limits via <strong>Fieller's theorem</strong>. Requires ≥ 2 concentration points per insecticide.
+            Probit regression uses <strong>final Abbott's corrected mortality %</strong> for each treatment concentration.
+            LC values = lethal concentration killing X% of test population.
+            Requires ≥ 2 concentration points per insecticide.
         </div>`;
 
     const probitKeys = Object.keys(probitResults);
     if (!probitKeys.length) {
-        html += `<div class="warn-box">No non-control treatments found for probit analysis.</div>`;
+        html += `<div class="warn-box">No non-control treatments with concentration data found for probit analysis.</div>`;
     } else {
         // Summary table
         html += `<div class="result-table-wrap">
@@ -836,18 +1142,17 @@ function renderResults(title, treatmentData, probitResults, n, numReps) {
                     <tr>
                         <th>S.No</th>
                         <th>Insecticide</th>
-                        <th>Conc Range</th>
+                        <th>Conc Range (%)</th>
                         <th>LC₁₅</th>
                         <th>LC₂₅</th>
                         <th>LC₃₀</th>
                         <th>LC₅₀</th>
-                        <th>LC₉₅</th>
+                        <th>LC₉₀</th>
                         <th>95% FL (LC₅₀)</th>
-                        <th>95% FL (LC₉₅)</th>
                         <th>χ² (df)</th>
                         <th>R²</th>
-                        <th>Slope b ± SE</th>
-                        <th>Intercept a</th>
+                        <th>Slope ± SE</th>
+                        <th>Regression Equation</th>
                     </tr>
                 </thead>
                 <tbody>`;
@@ -856,97 +1161,86 @@ function renderResults(title, treatmentData, probitResults, n, numReps) {
             const res = probitResults[insecticide];
             if (res.insufficient) {
                 html += `<tr>
-                    <td>${idx + 1}</td><td>${insecticide}</td>
-                    <td colspan="12" style="color:var(--warn); font-style:italic;">
-                        Need ≥ 2 concentration points (found ${res.pts.length})
-                    </td></tr>`;
+                    <td>${idx+1}</td>
+                    <td>${insecticide}</td>
+                    <td colspan="11" style="color:var(--warn); font-style:italic;">
+                        Insufficient data — need ≥ 2 concentration points (found ${res.pts.length})
+                    </td>
+                </tr>`;
                 return;
             }
-            const lc  = res.lcValues;
-            const fmt = v => isNaN(v) ? '—' : v.toFixed(4);
+            const lc = res.lcValues;
             html += `<tr>
-                <td>${idx + 1}</td>
+                <td>${idx+1}</td>
                 <td style="font-weight:700;">${insecticide}</td>
-                <td>${res.minConc} – ${res.maxConc}</td>
-                <td class="probit-lc15">${fmt(lc.LC15)}</td>
-                <td class="probit-lc25">${fmt(lc.LC25)}</td>
-                <td class="probit-lc25">${fmt(lc.LC30)}</td>
-                <td class="probit-lc50">${fmt(lc.LC50)}</td>
-                <td class="probit-lc90">${fmt(lc.LC95)}</td>
-                <td style="font-size:0.65rem;">${fmt(res.fl50.lower)} – ${fmt(res.fl50.upper)}</td>
-                <td style="font-size:0.65rem;">${fmt(res.fl95.lower)} – ${fmt(res.fl95.upper)}</td>
-                <td>${res.chi2.toFixed(3)} (${res.chi2df})
-                    <span style="color:${res.sig ? 'var(--danger)' : 'var(--accent)'}; font-weight:700;">
-                        ${res.sig ? 'S' : 'NS'}
-                    </span>
-                </td>
-                <td style="font-weight:700;">${res.r2.toFixed(4)}</td>
-                <td>${res.slope.toFixed(4)} ± ${res.slopeSE.toFixed(4)}</td>
-                <td>${res.intercept.toFixed(4)}</td>
+                <td>${res.minConc.toFixed(4)} – ${res.maxConc.toFixed(4)}</td>
+                <td class="probit-lc15">${lc.LC15.toFixed(4)}</td>
+                <td class="probit-lc25">${lc.LC25.toFixed(4)}</td>
+                <td class="probit-lc25">${lc.LC30.toFixed(4)}</td>
+                <td class="probit-lc50">${lc.LC50.toFixed(4)}</td>
+                <td class="probit-lc90">${lc.LC90.toFixed(4)}</td>
+                <td style="font-size:0.65rem;">${res.fl.lower.toFixed(4)} – ${res.fl.upper.toFixed(4)}</td>
+                <td>${res.chi2.toFixed(2)} (${res.df}) <span style="color:${res.sig?'var(--danger)':'var(--accent)'};">${res.sig?'S':'NS'}</span></td>
+                <td style="font-weight:700;">${res.r2.toFixed(3)}</td>
+                <td>${res.slope.toFixed(3)} ± ${res.slopeStdErr.toFixed(3)}</td>
+                <td style="font-size:0.65rem; font-family:'JetBrains Mono',monospace;">${res.equation}</td>
             </tr>`;
         });
 
         html += `</tbody></table></div>`;
 
-        // Per-insecticide working probit detail
+        // Per-insecticide detail with probit data points
         html += `<div style="margin-top:1.5rem;">`;
         probitKeys.forEach(insecticide => {
             const res = probitResults[insecticide];
             if (res.insufficient) return;
             html += `
                 <div class="probit-data-section" style="margin-bottom:1rem;">
-                    <div class="probit-data-header">${insecticide} — Working probit data points</div>
+                    <div class="probit-data-header">
+                        ${insecticide} — Probit data points (used for regression)
+                    </div>
                     <div class="result-table-wrap">
                     <table class="result-table">
                         <thead><tr>
-                            <th>Conc (%)</th><th>Log₁₀(C)</th><th>Abbott's Mort %</th>
-                            <th>Emp. Probit (EP)</th><th>y₀</th><th>k</th><th>WC</th>
-                            <th>Weight (n·WC)</th><th>Working Probit (Yᵢ)</th>
-                            <th>Expected Probit (ŷ)</th><th>Residual</th>
-                        </tr></thead><tbody>`;
+                            <th>Concentration (%)</th>
+                            <th>Log₁₀(Conc)</th>
+                            <th>Abbott's Mortality %</th>
+                            <th>Constrained %</th>
+                            <th>Probit Value</th>
+                            <th>Expected Probit</th>
+                            <th>Residual</th>
+                        </tr></thead>
+                        <tbody>`;
             res.data.forEach(d => {
                 const expected = res.intercept + res.slope * d.logC;
-                const resid    = d.Yi - expected;
+                const resid = d.probit - expected;
                 html += `<tr>
                     <td>${d.conc}</td>
                     <td>${d.logC.toFixed(4)}</td>
                     <td>${d.mortalityPct.toFixed(2)}%</td>
-                    <td class="highlight">${d.EP.toFixed(4)}</td>
-                    <td>${d.y0.toFixed(4)}</td>
-                    <td>${d.k.toFixed(4)}</td>
-                    <td>${d.WC.toFixed(4)}</td>
-                    <td>${d.wi.toFixed(4)}</td>
-                    <td>${d.Yi.toFixed(4)}</td>
+                    <td>${d.m.toFixed(2)}%</td>
+                    <td class="highlight">${d.probit.toFixed(4)}</td>
                     <td>${expected.toFixed(4)}</td>
-                    <td style="color:${Math.abs(resid) > 0.5 ? 'var(--warn)' : 'var(--text3)'};">${resid.toFixed(4)}</td>
+                    <td style="color:${Math.abs(resid)>0.5?'var(--warn)':'var(--text3)'};">${resid.toFixed(4)}</td>
                 </tr>`;
             });
-            html += `</tbody></table></div>
-                <div style="padding:0.75rem; background:var(--bg); font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--text2); border-top:1px solid var(--border);">
-                    <strong>Regression:</strong> ${res.equation} &nbsp;|&nbsp;
-                    <strong>R²:</strong> ${res.r2.toFixed(4)} &nbsp;|&nbsp;
-                    <strong>χ²(${res.chi2df}):</strong> ${res.chi2.toFixed(3)} (critical ${res.critChi2.toFixed(3)})
-                    <span style="color:${res.sig ? 'var(--danger)' : 'var(--primary-light)'};">
-                        ${res.sig ? 'SIGNIFICANT — heterogeneity present' : 'NOT SIGNIFICANT — good fit'}
-                    </span><br>
-                    <strong>Log LC₅₀:</strong> ${((5 - res.intercept) / res.slope).toFixed(6)} &nbsp;|&nbsp;
-                    <strong>LC₅₀:</strong> ${res.lcValues.LC50.toFixed(6)} &nbsp;|&nbsp;
-                    <strong>LC₉₅:</strong> ${res.lcValues.LC95.toFixed(6)}
-                </div>
-            </div>`;
+            html += `</tbody></table></div></div>`;
         });
         html += `</div>`;
 
+        // Interpretation guide
         html += `<div class="info-box" style="margin-top:1rem;">
             <strong>Statistical interpretation:</strong>
             <span style="font-family:'JetBrains Mono',monospace; font-size:0.78rem;">
-                R² > 0.90 = excellent fit · χ² NS = data fits probit model well ·
-                ⚠ on cumulative M+D = cap of ${n} insects/rep was reached
+                R² > 0.80 = good fit · χ² NS = data fits probit model well · Narrow FL = precise LC₅₀ estimate · S = significant heterogeneity
             </span>
         </div>`;
     }
 
-    html += `</div></div>`;
+    html += `</div>`; // close section C
+
+    html += `</div>`; // close padding wrapper
+
     rc.innerHTML = html;
     rc.classList.add('fade-in');
     rc.scrollTop = 0;
@@ -961,11 +1255,10 @@ function setBadgeDone() {
 }
 
 // ─────────────────────────────────────────────
-//  INIT — sample data (matching your example)
-//  10 insects/rep, 3 reps, times: 6h and 12h
-//  Chlorpyriphos 0.02%
+//  INIT — sample data
 // ─────────────────────────────────────────────
 window.addEventListener('load', () => {
+    // Three concentrations of two insecticides + control
     setTimeout(() => {
         addTreatment('Chlorpyriphos', '0.01');
         addTreatment('Chlorpyriphos', '0.02');
@@ -974,22 +1267,27 @@ window.addEventListener('load', () => {
         addTreatment('Cypermethrin', '0.01');
         addTreatment('Cypermethrin', '0.02');
         addControl('Control (Distilled Water)', '0');
-
         document.getElementById('obs-times').value = '24, 48, 72';
         document.getElementById('insects-per-rep').value = '30';
         document.getElementById('num-reps').value = '3';
         rebuildTables();
 
+        // fill sample data
         setTimeout(() => {
-            // Sample data: treatment id 2 = Chlorpyriphos 0.02%
-            // Illustrating your exact example logic with 30 insects
             const sampleData = {
+                // Chlorpyriphos 0.01%
                 '1': { '24': [[1,0],[1,0],[1,0]], '48': [[1,1],[2,0],[1,1]], '72': [[0,2],[1,2],[0,3]] },
+                // Chlorpyriphos 0.02%
                 '2': { '24': [[3,0],[2,0],[3,0]], '48': [[2,2],[2,1],[2,2]], '72': [[1,4],[0,5],[1,4]] },
+                // Chlorpyriphos 0.05%
                 '3': { '24': [[5,1],[4,1],[5,0]], '48': [[2,4],[2,4],[3,3]], '72': [[1,6],[0,6],[0,7]] },
+                // Cypermethrin 0.005%
                 '4': { '24': [[1,0],[0,0],[1,0]], '48': [[1,0],[1,0],[1,1]], '72': [[0,1],[0,2],[0,1]] },
+                // Cypermethrin 0.01%
                 '5': { '24': [[2,0],[2,0],[2,0]], '48': [[1,2],[1,1],[2,1]], '72': [[0,3],[1,3],[0,3]] },
+                // Cypermethrin 0.02%
                 '6': { '24': [[4,1],[3,1],[4,0]], '48': [[2,3],[2,3],[1,4]], '72': [[0,5],[1,5],[0,6]] },
+                // Control
                 '7': { '24': [[0,0],[0,0],[0,0]], '48': [[0,0],[0,0],[0,0]], '72': [[0,1],[0,0],[0,0]] }
             };
             Object.entries(sampleData).forEach(([tid, times]) => {
